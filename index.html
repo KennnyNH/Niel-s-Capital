@@ -3,101 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niel's Capital | V1.8 Stable</title>
+    <title>Niel's Capital | V1.9 Cloud Sync</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-main: #050505; --bg-panel: #0f0f0f; --accent: #d4af37;
             --text-main: #d1d1d1; --border: #2a2a2a; --danger: #eb4034; --safe: #34eb77;
-            --crypto-color: #00d2ff; --saham-color: #34eb77;
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px; font-size: 13px; }
-        
-        /* Header & Balance */
         .header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
         .header h1 { color: var(--accent); margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
         .live-date { font-size: 11px; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .balance-display { text-align: right; }
-        .balance-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
         .balance-val { font-size: 22px; font-weight: bold; color: var(--accent); }
-
-        /* Sidebar & Overlay */
-        .sidebar { position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: #0a0a0a; border-left: 1px solid var(--accent); transition: 0.3s; z-index: 1001; padding: 20px; box-sizing: border-box; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.8);}
+        .sidebar { position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: #0a0a0a; border-left: 1px solid var(--accent); transition: 0.3s; z-index: 1001; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .sidebar.active { right: 0; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 1000; }
         .overlay.active { display: block; }
-        
-        .nav-item { padding: 12px; cursor: pointer; color: #fff; border-bottom: 1px solid #1a1a1a; transition: 0.2s; font-weight: bold; }
-        .nav-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--accent); }
-
-        .db-section { background: #111; border: 1px solid var(--border); padding: 15px; margin-top: 15px; border-radius: 6px; }
-        .db-section h4 { color: var(--accent); margin: 0 0 10px 0; font-size: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 5px; }
-
-        /* General Panels */
         .panel { background-color: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         h3.panel-title { display: flex; justify-content: space-between; align-items: center; color: var(--accent); margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
-        
-        label { display: block; margin-bottom: 4px; color: #888; font-size: 10px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 12px; background: #000; border: 1px solid var(--border); color: #fff; box-sizing: border-box; border-radius: 4px; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 12px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 4px; }
         button { width: 100%; padding: 10px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        
-        /* Toggle Long/Short */
-        .ls-toggle { display: flex; gap: 10px; margin-bottom: 12px; }
-        .ls-btn { flex: 1; padding: 8px; border: 1px solid var(--border); background: #1a1a1a; color: #888; border-radius: 4px; cursor: pointer; text-align: center; font-weight: bold; transition: 0.2s;}
-        .ls-btn.active-long { border-color: var(--safe); color: var(--safe); background: rgba(52, 235, 119, 0.1); }
-        .ls-btn.active-short { border-color: var(--danger); color: var(--danger); background: rgba(235, 64, 52, 0.1); }
-
-        /* Chart Area */
-        .chart-toggles { display: flex; gap: 10px; margin-bottom: 15px; }
-        .toggle-btn { background: #111; border: 1px solid var(--border); color: #fff; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; width: auto; }
-        .toggle-btn.active { border-color: var(--accent); background: rgba(212, 175, 55, 0.2); }
-        .chart-container { position: relative; height: 250px; width: 100%; }
-
-        /* Ledger Table */
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
         th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
-        .exit-input { width: 80px; padding: 5px; background: #000; border: 1px solid #444; color: #fff; border-radius: 3px; font-size: 11px; }
-        
-        #riskMsg { font-size: 11px; font-weight: bold; margin-bottom: 10px; display: block; }
-        .grid-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 1024px) { .grid-container { grid-template-columns: 1fr 1fr; } }
+        .ls-toggle { display: flex; gap: 10px; margin-bottom: 12px; }
+        .ls-btn { flex: 1; padding: 8px; border: 1px solid var(--border); background: #1a1a1a; color: #888; border-radius: 4px; cursor: pointer; text-align: center; font-weight: bold; }
+        .ls-btn.active-long { border-color: var(--safe); color: var(--safe); background: rgba(52, 235, 119, 0.1); }
+        .ls-btn.active-short { border-color: var(--danger); color: var(--danger); background: rgba(235, 64, 52, 0.1); }
+        .chart-container { height: 200px; }
     </style>
 </head>
 <body>
 
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-    
     <div class="sidebar" id="sidebar">
-        <h2 style="color:var(--accent); font-size:16px; margin-top:0; border-bottom:1px solid var(--accent); padding-bottom:10px;">NIEL'S CAPITAL MENU</h2>
+        <h2 style="color:var(--accent); font-size:16px;">NIEL'S CAPITAL MENU</h2>
+        <div onclick="switchView('all')" style="padding:12px; cursor:pointer; border-bottom:1px solid #111;">🏠 TOTAL PORTFOLIO</div>
+        <div onclick="switchView('saham')" style="padding:12px; cursor:pointer; border-bottom:1px solid #111;">🟢 SAHAM TERMINAL</div>
+        <div onclick="switchView('crypto')" style="padding:12px; cursor:pointer; border-bottom:1px solid #111;">🔵 CRYPTO TERMINAL</div>
         
-        <div class="nav-item" onclick="switchView('all')">🏠 TOTAL PORTFOLIO</div>
-        <div class="nav-item" onclick="switchView('saham')">🟢 SAHAM TERMINAL</div>
-        <div class="nav-item" onclick="switchView('crypto')">🔵 CRYPTO TERMINAL</div>
-        
-        <div class="db-section">
-            <h4>⚙️ SET MODAL AUM</h4>
-            <label>Modal Saham</label><input type="number" id="initSaham" placeholder="Rp">
-            <label>Modal Crypto</label><input type="number" id="initCrypto" placeholder="Rp">
+        <div style="background:#111; padding:15px; margin-top:15px; border-radius:6px;">
+            <label style="font-size:10px; color:#888;">SET MODAL AUM</label>
+            <input type="number" id="initSaham" placeholder="Modal Saham">
+            <input type="number" id="initCrypto" placeholder="Modal Crypto">
             <button onclick="initAUM()">SIMPAN AUM</button>
         </div>
-
-        <div class="db-section">
-            <h4>📂 DATA MANAGER (CSV)</h4>
-            <label>Inject Ke:</label>
-            <select id="injectTarget">
-                <option value="saham">Ledger Saham</option>
-                <option value="crypto">Ledger Crypto</option>
-            </select>
-            <input type="file" id="csvFile" accept=".csv" style="padding:5px;">
-            <button onclick="injectCSV()" style="background:#fff; color:#000; margin-bottom:15px;">⚡ INJECT DATA</button>
-            
-            <div style="display:flex; gap:10px;">
-                <button onclick="exportData('saham')" style="background:transparent; border:1px solid var(--saham-color); color:var(--saham-color); font-size:10px;">📥 Backup Saham</button>
-                <button onclick="exportData('crypto')" style="background:transparent; border:1px solid var(--crypto-color); color:var(--crypto-color); font-size:10px;">📥 Backup Crypto</button>
-            </div>
-        </div>
-        
         <button onclick="clearAll()" style="background:transparent; border:1px solid var(--danger); color:var(--danger); margin-top:20px;">⚠️ FORMAT DATABASE</button>
     </div>
 
@@ -105,61 +55,43 @@
         <div>
             <h1>NIEL'S CAPITAL</h1>
             <div id="viewIndicator" style="font-size: 11px; color: var(--accent); font-weight: bold; margin-top: 5px;">VIEW: TOTAL PORTFOLIO</div>
-            <div class="live-date" id="realTimeClock">Memuat Waktu...</div>
+            <div class="live-date" id="realTimeClock">Loading...</div>
         </div>
-        <div class="balance-display">
-            <div class="balance-label">TOTAL EQUITY AUM</div>
+        <div class="balance-display" style="text-align:right;">
+            <div style="font-size:10px; color:#888;">TOTAL EQUITY AUM</div>
             <div id="totalEquity" class="balance-val">Rp 0</div>
         </div>
     </div>
 
     <div class="panel">
-        <h3 class="panel-title">
-            <span>📊 PORTFOLIO ANALYTICS</span>
-            <button onclick="toggleSidebar()" style="background:none; border:none; color:var(--accent); font-size:24px; cursor:pointer; padding:0;">☰</button>
-        </h3>
-        
-        <div class="chart-toggles">
-            <button class="toggle-btn active" id="btnPie" onclick="setChart('pie')">⭕</button>
-            <button class="toggle-btn" id="btnLine" onclick="setChart('line')">📈</button>
-        </div>
-        
-        <div class="chart-container">
-            <canvas id="mainChart"></canvas>
-        </div>
+        <h3 class="panel-title"><span>📊 Analytics</span><button onclick="toggleSidebar()" style="background:none; border:none; color:var(--accent); font-size:24px; cursor:pointer;">☰</button></h3>
+        <div class="chart-container"><canvas id="mainChart"></canvas></div>
     </div>
 
-    <div class="grid-container">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
         <div class="panel">
-            <h3 class="panel-title" id="execTitle">⚔️ EXECUTION ENGINE</h3>
-            
-            <div class="ls-toggle" id="lsToggleBox" style="display: none;">
+            <h3 class="panel-title" id="execTitle">⚔️ Execution</h3>
+            <div class="ls-toggle" id="lsToggleBox" style="display:none;">
                 <div id="longBtn" class="ls-btn active-long" onclick="setSide('LONG')">LONG</div>
                 <div id="shortBtn" class="ls-btn" onclick="setSide('SHORT')">SHORT</div>
             </div>
-            
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div><label>Kode Aset</label><input type="text" id="asset" placeholder="Contoh: BTC / BBRI"></div>
-                <div><label>Risk (%)</label><input type="number" id="riskPct" value="2" oninput="validateRisk()"></div>
+                <input type="text" id="asset" placeholder="ASSET">
+                <input type="number" id="riskPct" value="2" oninput="validateRisk()">
             </div>
-            
-            <div id="riskMsg"></div>
-            
+            <div id="riskMsg" style="font-size:11px; margin-bottom:10px;"></div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div><label>Entry Price</label><input type="number" id="entry"></div>
-                <div><label>Stop Loss</label><input type="number" id="sl"></div>
+                <input type="number" id="entry" placeholder="ENTRY">
+                <input type="number" id="sl" placeholder="STOP LOSS">
             </div>
-            
-            <button onclick="executeTrade()" id="btnExec" style="padding:12px; font-size:14px;">CONFIRM EXECUTION</button>
+            <button onclick="executeTrade()" id="btnExec">CONFIRM EXECUTION</button>
         </div>
 
         <div class="panel">
-            <h3 class="panel-title">📓 TRANSACTION LEDGER</h3>
+            <h3 class="panel-title">📓 Ledger</h3>
             <div style="overflow-x:auto;">
                 <table>
-                    <thead>
-                        <tr><th>Asset</th><th>Risk Rp</th><th>Leverage/Size</th><th>Entry</th><th>Exit</th><th>Status</th></tr>
-                    </thead>
+                    <thead><tr><th>Asset</th><th>Risk Rp</th><th>Size</th><th>Entry</th><th>Exit</th><th>Status</th></tr></thead>
                     <tbody id="ledgerBody"></tbody>
                 </table>
             </div>
@@ -167,87 +99,60 @@
     </div>
 
     <script>
-        let currentView = 'all'; // all, saham, crypto
-        let currentSide = 'LONG'; 
-        let chartType = 'pie';
-        
+        // --- KONFIGURASI CLOUD SYNC ---
+        // Ganti teks di bawah ini dengan link Web App URL lu!
+        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbzP6TpmDU_lLBCRrPK5m7hehEN3fGfWXji78UNKrPIBvl3gZsmcqdoFBAVuaBo8kJPJ/exec";
+
+        let currentView = 'all'; let currentSide = 'LONG'; 
         let balSaham = parseFloat(localStorage.getItem('n_s_bal')) || 0;
         let balCrypto = parseFloat(localStorage.getItem('n_c_bal')) || 0;
         let histSaham = JSON.parse(localStorage.getItem('n_s_hist')) || [];
         let histCrypto = JSON.parse(localStorage.getItem('n_c_hist')) || [];
         let mainChart = null;
 
-        // Jam Live
         function updateRealTimeClock() {
             const now = new Date();
-            document.getElementById('realTimeClock').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
+            document.getElementById('realTimeClock').innerText = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
         }
         setInterval(updateRealTimeClock, 1000); updateRealTimeClock();
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
+
+        async function syncToCloud(trade, type) {
+            if(CLOUD_API_URL.includes("ISI_LINK")) return;
+            const payload = {
+                type: type === 'saham' ? 'Saham' : 'Crypto',
+                date: new Date().toLocaleString('id-ID'),
+                asset: trade.asset,
+                side: trade.side,
+                entry: trade.entry,
+                exit: trade.exit || '-',
+                status: trade.status,
+                riskRp: trade.riskRp,
+                leverage: trade.leverage.toFixed(4),
+                equityAfter: trade.equityAfter
+            };
+            try {
+                await fetch(CLOUD_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                console.log("Cloud Sync Success!");
+            } catch(e) { console.error("Cloud Sync Error", e); }
         }
 
         function switchView(view) {
             currentView = view;
-            
-            // Update Teks Indikator & Judul Eksekusi
-            document.getElementById('viewIndicator').innerText = `VIEW: ${view === 'all' ? 'TOTAL PORTFOLIO' : view.toUpperCase() + ' TERMINAL'}`;
+            document.getElementById('viewIndicator').innerText = `VIEW: ${view === 'all' ? 'TOTAL PORTFOLIO' : view.toUpperCase()}`;
             document.getElementById('execTitle').innerText = `⚔️ EXECUTION: ${view === 'all' ? 'SAHAM' : view.toUpperCase()}`;
-            
-            // Logika Long/Short (Crypto Only)
-            if(view === 'crypto') {
-                document.getElementById('lsToggleBox').style.display = 'flex';
-                setSide('LONG');
-            } else {
-                document.getElementById('lsToggleBox').style.display = 'none';
-                currentSide = 'LONG'; // Saham pasti long
-            }
-            
-            // Default Chart behavior
-            if(view === 'all') setChart('pie'); else setChart('line');
-            
-            toggleSidebar();
-            updateUI();
-            validateRisk();
-        }
-
-        function setChart(t) { 
-            chartType = t; 
-            document.getElementById('btnPie').className = t === 'pie' ? 'toggle-btn active' : 'toggle-btn';
-            document.getElementById('btnLine').className = t === 'line' ? 'toggle-btn active' : 'toggle-btn';
-            updateUI(); 
-        }
-
-        function setSide(s) { 
-            currentSide = s; 
-            document.getElementById('longBtn').className = s === 'LONG' ? 'ls-btn active-long' : 'ls-btn'; 
-            document.getElementById('shortBtn').className = s === 'SHORT' ? 'ls-btn active-short' : 'ls-btn'; 
+            document.getElementById('lsToggleBox').style.display = view === 'crypto' ? 'flex' : 'none';
+            toggleSidebar(); updateUI();
         }
 
         function validateRisk() {
             const pct = parseFloat(document.getElementById('riskPct').value);
-            const msg = document.getElementById('riskMsg');
-            // Kalau view ALL, asumsikan lagi mau eksekusi Saham
-            const activeBal = (currentView === 'crypto') ? balCrypto : balSaham; 
+            const activeBal = (currentView === 'crypto') ? balCrypto : balSaham;
             const rp = activeBal * (pct/100);
-            
-            if(isNaN(pct) || activeBal === 0) { msg.innerText = ""; return; }
-            
-            if(pct > 5) {
-                msg.innerText = `⚠️ OVER LIMIT: Rp ${rp.toLocaleString('id-ID')}`;
-                msg.style.color = 'var(--danger)';
-            } else {
-                msg.innerText = `🛡️ Risk Dialokasikan: Rp ${rp.toLocaleString('id-ID')}`;
-                msg.style.color = 'var(--safe)';
-            }
-        }
-
-        function initAUM() { 
-            balSaham = parseFloat(document.getElementById('initSaham').value) || 0; 
-            balCrypto = parseFloat(document.getElementById('initCrypto').value) || 0; 
-            save(); updateUI(); toggleSidebar(); alert("Modal AUM Berhasil Di-Set!");
+            const msg = document.getElementById('riskMsg');
+            msg.innerText = isNaN(rp) ? "" : `🛡️ Risk: Rp ${Math.floor(rp).toLocaleString('id-ID')}`;
+            msg.style.color = pct > 5 ? 'var(--danger)' : 'var(--safe)';
         }
 
         function executeTrade() {
@@ -255,116 +160,52 @@
             const riskP = parseFloat(document.getElementById('riskPct').value);
             const entry = parseFloat(document.getElementById('entry').value);
             const sl = parseFloat(document.getElementById('sl').value);
-            
             const type = (currentView === 'crypto') ? 'crypto' : 'saham';
             let activeBal = type === 'saham' ? balSaham : balCrypto;
 
-            if(!asset || isNaN(entry) || isNaN(sl)) return alert("Isi Asset, Entry, dan Stop Loss!");
-            if(activeBal === 0) return alert("AUM masih 0. Buka menu ☰ dan set modal dulu!");
+            if(!asset || isNaN(entry) || isNaN(sl) || activeBal === 0) return alert("Cek data / Modal masih 0!");
 
             const riskRp = activeBal * (riskP / 100);
-            const leverage = Math.abs(riskRp / (entry - sl)); // Position Sizing Math
-
+            const leverage = Math.abs(riskRp / (entry - sl));
             const trade = { asset, riskRp, leverage, entry, sl, side: currentSide, status: 'PENDING', exit: null, equityAfter: activeBal };
+            
             if(type === 'saham') histSaham.push(trade); else histCrypto.push(trade);
+            save(); updateUI(); 
+            syncToCloud(trade, type); // Panggil fungsi sync ke Google Sheets
             
-            save(); updateUI();
             document.getElementById('asset').value = ''; document.getElementById('entry').value = ''; document.getElementById('sl').value = '';
-        }
-
-        function updateExit(index, val, type) {
-            let hist = type === 'saham' ? histSaham : histCrypto;
-            let trade = hist[index];
-            trade.exit = parseFloat(val);
-            
-            if(!isNaN(trade.exit)) {
-                if(trade.side === 'LONG') trade.status = trade.exit > trade.entry ? 'WIN' : 'LOSS';
-                else trade.status = trade.exit < trade.entry ? 'WIN' : 'LOSS';
-                
-                // PnL Calculation (Simulasi fixed RR 1:2 untuk contoh, atau pakai hitungan real)
-                let pnl = trade.status === 'WIN' ? (trade.riskRp * 2) : -trade.riskRp;
-                if(type === 'saham') balSaham += pnl; else balCrypto += pnl;
-                trade.equityAfter = (type === 'saham' ? balSaham : balCrypto);
-            } else {
-                trade.status = 'PENDING';
-            }
-            save(); updateUI();
-        }
-
-        function injectCSV() {
-            const type = document.getElementById('injectTarget').value;
-            const file = document.getElementById('csvFile').files[0];
-            if (!file) return alert("Pilih file CSV dulu!");
-            
-            Papa.parse(file, { header: true, skipEmptyLines: true, complete: function(results) {
-                let count = 0;
-                results.data.forEach(row => { 
-                    if(row.Asset && row.Entry && row.StopLoss) { 
-                        let activeBal = type === 'saham' ? balSaham : balCrypto;
-                        let rRp = activeBal * ((parseFloat(row.RiskPct)||2) / 100);
-                        let lev = Math.abs(rRp / (parseFloat(row.Entry) - parseFloat(row.StopLoss)));
-                        let stat = (row.Result || 'PENDING').toUpperCase();
-                        
-                        let trade = { asset: row.Asset.toUpperCase(), riskRp: rRp, leverage: lev, entry: parseFloat(row.Entry), sl: parseFloat(row.StopLoss), side: 'LONG', status: stat, exit: parseFloat(row.TakeProfit) || null, equityAfter: activeBal };
-                        if(type === 'saham') histSaham.push(trade); else histCrypto.push(trade);
-                        count++; 
-                    } 
-                });
-                save(); updateUI(); toggleSidebar();
-                alert(`SUKSES! ${count} trade berhasil di-inject.`); document.getElementById('csvFile').value = "";
-            }});
-        }
-
-        function exportData(type) {
-            let arr = type === 'saham' ? histSaham : histCrypto;
-            if(arr.length === 0) return alert("Data kosong!");
-            const exportData = arr.map(t => ({ Asset: t.asset, RiskPct: 2, Entry: t.entry, StopLoss: t.sl, TakeProfit: t.exit, Result: t.status }));
-            const csv = Papa.unparse(exportData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `NielsCapital_${type.toUpperCase()}_Backup.csv`;
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
 
         function updateUI() {
             document.getElementById('totalEquity').innerText = `Rp ${(balSaham + balCrypto).toLocaleString('id-ID')}`;
-            const body = document.getElementById('ledgerBody');
-            body.innerHTML = '';
+            const body = document.getElementById('ledgerBody'); body.innerHTML = '';
             let activeHist = currentView === 'crypto' ? histCrypto : (currentView === 'saham' ? histSaham : [...histSaham, ...histCrypto]);
-
+            
             activeHist.slice().reverse().forEach((t, i) => {
-                let idx = activeHist.length - 1 - i;
-                let actualType = (currentView === 'all') ? (t.side ? 'crypto' : 'saham') : currentView; // simplified detection
-                
                 body.insertAdjacentHTML('beforeend', `
                     <tr>
-                        <td><b>${t.asset}</b> <span style="font-size:9px; color:#888;">${t.side}</span></td>
+                        <td><b>${t.asset}</b></td>
                         <td>${Math.floor(t.riskRp).toLocaleString('id-ID')}</td>
-                        <td style="color:var(--accent)">${t.leverage.toFixed(4)}</td>
-                        <td>${t.entry.toLocaleString('id-ID')}</td>
-                        <td><input type="number" class="exit-input" value="${t.exit || ''}" onchange="updateExit(${idx}, this.value, '${currentView === 'crypto' ? 'crypto' : 'saham'}')"></td>
-                        <td style="color:${t.status === 'WIN' ? 'var(--safe)' : (t.status === 'LOSS' ? 'var(--danger)' : 'var(--accent)')}; font-weight:bold;">${t.status}</td>
+                        <td style="color:var(--accent)">${t.leverage.toFixed(3)}</td>
+                        <td>${t.entry.toLocaleString()}</td>
+                        <td>-</td>
+                        <td style="color:var(--accent)">${t.status}</td>
                     </tr>
                 `);
             });
             renderChart();
-            validateRisk();
         }
 
         function renderChart() {
             const ctx = document.getElementById('mainChart').getContext('2d');
             if(mainChart) mainChart.destroy();
-            Chart.defaults.color = '#888';
-            if(chartType === 'pie') {
-                mainChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Saham', 'Crypto'], datasets: [{ data: [balSaham, balCrypto], backgroundColor: ['#34eb77', '#00d2ff'], borderWidth: 0 }] }, options: { maintainAspectRatio: false } });
-            } else {
-                let hist = currentView === 'crypto' ? histCrypto : histSaham;
-                let color = currentView === 'crypto' ? '#00d2ff' : '#34eb77';
-                mainChart = new Chart(ctx, { type: 'line', data: { labels: hist.map(t => t.asset), datasets: [{ label: 'Equity Growth', data: hist.map(t => t.equityAfter), borderColor: color, fill: false }] }, options: { maintainAspectRatio: false } });
-            }
+            mainChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Saham', 'Crypto'], datasets: [{ data: [balSaham, balCrypto], backgroundColor: ['#34eb77', '#00d2ff'], borderWidth: 0 }] }, options: { maintainAspectRatio: false } });
         }
 
         function save() { localStorage.setItem('n_s_bal', balSaham); localStorage.setItem('n_c_bal', balCrypto); localStorage.setItem('n_s_hist', JSON.stringify(histSaham)); localStorage.setItem('n_c_hist', JSON.stringify(histCrypto)); }
-        function clearAll() { if(confirm("FORMAT SEMUA DATABASE?")) { localStorage.clear(); location.reload(); } }
-
+        function setSide(s) { currentSide = s; document.getElementById('longBtn').className = s === 'LONG' ? 'ls-btn active-long' : 'ls-btn'; document.getElementById('shortBtn').className = s === 'SHORT' ? 'ls-btn active-short' : 'ls-btn'; }
+        function initAUM() { balSaham = parseFloat(document.getElementById('initSaham').value) || 0; balCrypto = parseFloat(document.getElementById('initCrypto').value) || 0; save(); updateUI(); toggleSidebar(); }
+        function clearAll() { if(confirm("FORMAT DATABASE?")) { localStorage.clear(); location.reload(); } }
         updateUI();
     </script>
 </body>
