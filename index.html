@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niel's Capital | V1.9 Cloud Sync</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <title>Niel's Capital | V2.0 Cloud Sync</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -12,86 +11,97 @@
             --text-main: #d1d1d1; --border: #2a2a2a; --danger: #eb4034; --safe: #34eb77;
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px; font-size: 13px; }
-        .header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .header h1 { color: var(--accent); margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-        .live-date { font-size: 11px; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .balance-val { font-size: 22px; font-weight: bold; color: var(--accent); }
-        .sidebar { position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: #0a0a0a; border-left: 1px solid var(--accent); transition: 0.3s; z-index: 1001; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        
+        .header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header h1 { color: var(--accent); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        /* Hamburger di Pojok Kanan Atas */
+        .menu-trigger { background: none; border: none; color: var(--accent); font-size: 28px; cursor: pointer; padding: 0; }
+        
+        .live-date { font-size: 10px; color: #666; margin-top: 5px; text-transform: uppercase; }
+        .balance-val { font-size: 20px; font-weight: bold; color: var(--accent); }
+
+        .sidebar { position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: #0a0a0a; border-left: 1px solid var(--accent); transition: 0.3s; z-index: 1001; padding: 20px; box-sizing: border-box; }
         .sidebar.active { right: 0; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 1000; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1000; }
         .overlay.active { display: block; }
+
         .panel { background-color: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        h3.panel-title { display: flex; justify-content: space-between; align-items: center; color: var(--accent); margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 12px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 4px; }
-        button { width: 100%; padding: 10px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
-        .ls-toggle { display: flex; gap: 10px; margin-bottom: 12px; }
-        .ls-btn { flex: 1; padding: 8px; border: 1px solid var(--border); background: #1a1a1a; color: #888; border-radius: 4px; cursor: pointer; text-align: center; font-weight: bold; }
-        .ls-btn.active-long { border-color: var(--safe); color: var(--safe); background: rgba(52, 235, 119, 0.1); }
-        .ls-btn.active-short { border-color: var(--danger); color: var(--danger); background: rgba(235, 64, 52, 0.1); }
-        .chart-container { height: 200px; }
+        h3.panel-title { color: var(--accent); margin: 0 0 12px 0; font-size: 12px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+        
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 4px; box-sizing: border-box; }
+        button.btn-main { width: 100%; padding: 12px; background: var(--accent); border: none; font-weight: bold; cursor: pointer; border-radius: 4px; color: #000; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        th, td { padding: 8px 5px; border-bottom: 1px solid var(--border); text-align: left; }
+        .exit-input { width: 60px; background: #000; border: 1px solid #333; color: #fff; padding: 4px; font-size: 10px; border-radius: 3px; }
+
+        .ls-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+        .ls-btn { flex: 1; padding: 8px; border: 1px solid var(--border); background: #111; color: #555; border-radius: 4px; cursor: pointer; font-weight: bold; text-align: center; }
+        .ls-btn.active-long { border-color: var(--safe); color: var(--safe); }
+        .ls-btn.active-short { border-color: var(--danger); color: var(--danger); }
+        
+        .chart-box { height: 180px; width: 100%; }
     </style>
 </head>
 <body>
 
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
-        <h2 style="color:var(--accent); font-size:16px;">NIEL'S CAPITAL MENU</h2>
-        <div onclick="switchView('all')" style="padding:12px; cursor:pointer; border-bottom:1px solid #111;">🏠 TOTAL PORTFOLIO</div>
-        <div onclick="switchView('saham')" style="padding:12px; cursor:pointer; border-bottom:1px solid #111;">🟢 SAHAM TERMINAL</div>
-        <div onclick="switchView('crypto')" style="padding:12px; cursor:pointer; border-bottom:1px solid #111;">🔵 CRYPTO TERMINAL</div>
+        <h2 style="color:var(--accent); font-size:14px; border-bottom:1px solid var(--accent); padding-bottom:10px;">NIEL'S MENU</h2>
+        <div onclick="switchView('all')" style="padding:15px 0; cursor:pointer; border-bottom:1px solid #111;">🏠 TOTAL PORTFOLIO</div>
+        <div onclick="switchView('saham')" style="padding:15px 0; cursor:pointer; border-bottom:1px solid #111;">🟢 SAHAM TERMINAL</div>
+        <div onclick="switchView('crypto')" style="padding:15px 0; cursor:pointer; border-bottom:1px solid #111;">🔵 CRYPTO TERMINAL</div>
         
-        <div style="background:#111; padding:15px; margin-top:15px; border-radius:6px;">
-            <label style="font-size:10px; color:#888;">SET MODAL AUM</label>
+        <div style="margin-top:20px; background:#111; padding:10px; border-radius:5px;">
+            <label style="font-size:9px; color:#888;">SET MODAL AUM</label>
             <input type="number" id="initSaham" placeholder="Modal Saham">
             <input type="number" id="initCrypto" placeholder="Modal Crypto">
-            <button onclick="initAUM()">SIMPAN AUM</button>
+            <button onclick="initAUM()" style="background:var(--accent); width:100%; padding:8px; border:none; font-weight:bold; cursor:pointer;">UPDATE AUM</button>
         </div>
-        <button onclick="clearAll()" style="background:transparent; border:1px solid var(--danger); color:var(--danger); margin-top:20px;">⚠️ FORMAT DATABASE</button>
+        <button onclick="clearAll()" style="background:none; border:1px solid var(--danger); color:var(--danger); width:100%; margin-top:30px; padding:10px; cursor:pointer;">FORMAT DB</button>
     </div>
 
     <div class="header">
-        <div>
+        <div style="flex: 1;">
             <h1>NIEL'S CAPITAL</h1>
-            <div id="viewIndicator" style="font-size: 11px; color: var(--accent); font-weight: bold; margin-top: 5px;">VIEW: TOTAL PORTFOLIO</div>
-            <div class="live-date" id="realTimeClock">Loading...</div>
+            <div id="viewIndicator" style="font-size: 10px; color: var(--accent); font-weight: bold; margin-top: 3px;">VIEW: ALL PORTFOLIO</div>
+            <div class="live-date" id="realTimeClock">Waktu...</div>
         </div>
-        <div class="balance-display" style="text-align:right;">
-            <div style="font-size:10px; color:#888;">TOTAL EQUITY AUM</div>
-            <div id="totalEquity" class="balance-val">Rp 0</div>
-        </div>
+        <button class="menu-trigger" onclick="toggleSidebar()">☰</button>
     </div>
 
-    <div class="panel">
-        <h3 class="panel-title"><span>📊 Analytics</span><button onclick="toggleSidebar()" style="background:none; border:none; color:var(--accent); font-size:24px; cursor:pointer;">☰</button></h3>
-        <div class="chart-container"><canvas id="mainChart"></canvas></div>
+    <div class="panel" style="text-align: center; border-color: var(--accent);">
+        <div style="font-size: 9px; color: #888; margin-bottom: 5px;">TOTAL EQUITY AUM</div>
+        <div id="totalEquity" class="balance-val">Rp 0</div>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
         <div class="panel">
-            <h3 class="panel-title" id="execTitle">⚔️ Execution</h3>
-            <div class="ls-toggle" id="lsToggleBox" style="display:none;">
-                <div id="longBtn" class="ls-btn active-long" onclick="setSide('LONG')">LONG</div>
-                <div id="shortBtn" class="ls-btn" onclick="setSide('SHORT')">SHORT</div>
+            <h3 class="panel-title" id="execTitle">⚔️ EXECUTION</h3>
+            <div class="ls-toggle" id="lsBox" style="display:none;">
+                <div id="btnL" class="ls-btn active-long" onclick="setSide('LONG')">LONG</div>
+                <div id="btnS" class="ls-btn" onclick="setSide('SHORT')">SHORT</div>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <input type="text" id="asset" placeholder="ASSET">
-                <input type="number" id="riskPct" value="2" oninput="validateRisk()">
+                <input type="number" id="riskP" value="2" oninput="valRisk()">
             </div>
-            <div id="riskMsg" style="font-size:11px; margin-bottom:10px;"></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div id="riskMsg" style="font-size:10px; margin-bottom:10px;"></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <input type="number" id="entry" placeholder="ENTRY">
                 <input type="number" id="sl" placeholder="STOP LOSS">
             </div>
-            <button onclick="executeTrade()" id="btnExec">CONFIRM EXECUTION</button>
+            <button class="btn-main" onclick="executeTrade()">CONFIRM TRADE</button>
         </div>
 
         <div class="panel">
-            <h3 class="panel-title">📓 Ledger</h3>
+            <h3 class="panel-title">📓 TRANSACTION LEDGER</h3>
             <div style="overflow-x:auto;">
                 <table>
-                    <thead><tr><th>Asset</th><th>Risk Rp</th><th>Size</th><th>Entry</th><th>Exit</th><th>Status</th></tr></thead>
+                    <thead>
+                        <tr><th>DATE</th><th>ASSET</th><th>SIZE</th><th>ENTRY</th><th>EXIT</th><th>STATUS</th></tr>
+                    </thead>
                     <tbody id="ledgerBody"></tbody>
                 </table>
             </div>
@@ -99,113 +109,105 @@
     </div>
 
     <script>
-        // --- KONFIGURASI CLOUD SYNC ---
-        // Ganti teks di bawah ini dengan link Web App URL lu!
-        const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbzP6TpmDU_lLBCRrPK5m7hehEN3fGfWXji78UNKrPIBvl3gZsmcqdoFBAVuaBo8kJPJ/exec";
+        // --- GANTI LINK DI BAWAH INI ---
+        const CLOUD_URL = "https://script.google.com/macros/s/AKfycby4vPK3E1iz--oGfyX3NE6TIigGJCL_qcmms1s0ypOL85wVhsE3K3mLVKomlRBNMQcWKA/exec";
 
-        let currentView = 'all'; let currentSide = 'LONG'; 
-        let balSaham = parseFloat(localStorage.getItem('n_s_bal')) || 0;
-        let balCrypto = parseFloat(localStorage.getItem('n_c_bal')) || 0;
-        let histSaham = JSON.parse(localStorage.getItem('n_s_hist')) || [];
-        let histCrypto = JSON.parse(localStorage.getItem('n_c_hist')) || [];
-        let mainChart = null;
+        let currentView = 'all'; let currentSide = 'LONG';
+        let balS = parseFloat(localStorage.getItem('n_s_bal')) || 0;
+        let balC = parseFloat(localStorage.getItem('n_c_bal')) || 0;
+        let histS = JSON.parse(localStorage.getItem('n_s_hist')) || [];
+        let histC = JSON.parse(localStorage.getItem('n_c_hist')) || [];
 
-        function updateRealTimeClock() {
-            const now = new Date();
-            document.getElementById('realTimeClock').innerText = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
+        function updateClock() {
+            const n = new Date();
+            document.getElementById('realTimeClock').innerText = n.toLocaleDateString('id-ID', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit'}) + " WIB";
         }
-        setInterval(updateRealTimeClock, 1000); updateRealTimeClock();
+        setInterval(updateClock, 1000); updateClock();
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
 
-        async function syncToCloud(trade, type) {
-            if(CLOUD_API_URL.includes("ISI_LINK")) return;
-            const payload = {
-                type: type === 'saham' ? 'Saham' : 'Crypto',
-                date: new Date().toLocaleString('id-ID'),
-                asset: trade.asset,
-                side: trade.side,
-                entry: trade.entry,
-                exit: trade.exit || '-',
-                status: trade.status,
-                riskRp: trade.riskRp,
-                leverage: trade.leverage.toFixed(4),
-                equityAfter: trade.equityAfter
-            };
-            try {
-                await fetch(CLOUD_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                console.log("Cloud Sync Success!");
-            } catch(e) { console.error("Cloud Sync Error", e); }
-        }
-
-        function switchView(view) {
-            currentView = view;
-            document.getElementById('viewIndicator').innerText = `VIEW: ${view === 'all' ? 'TOTAL PORTFOLIO' : view.toUpperCase()}`;
-            document.getElementById('execTitle').innerText = `⚔️ EXECUTION: ${view === 'all' ? 'SAHAM' : view.toUpperCase()}`;
-            document.getElementById('lsToggleBox').style.display = view === 'crypto' ? 'flex' : 'none';
+        function switchView(v) {
+            currentView = v;
+            document.getElementById('viewIndicator').innerText = `VIEW: ${v === 'all' ? 'ALL PORTFOLIO' : v.toUpperCase()}`;
+            document.getElementById('execTitle').innerText = `⚔️ EXECUTION: ${v === 'all' ? 'SAHAM' : v.toUpperCase()}`;
+            document.getElementById('lsBox').style.display = v === 'crypto' ? 'flex' : 'none';
             toggleSidebar(); updateUI();
         }
 
-        function validateRisk() {
-            const pct = parseFloat(document.getElementById('riskPct').value);
-            const activeBal = (currentView === 'crypto') ? balCrypto : balSaham;
-            const rp = activeBal * (pct/100);
-            const msg = document.getElementById('riskMsg');
-            msg.innerText = isNaN(rp) ? "" : `🛡️ Risk: Rp ${Math.floor(rp).toLocaleString('id-ID')}`;
-            msg.style.color = pct > 5 ? 'var(--danger)' : 'var(--safe)';
+        function valRisk() {
+            const p = parseFloat(document.getElementById('riskP').value);
+            const active = (currentView === 'crypto') ? balC : balS;
+            const rp = active * (p/100);
+            const m = document.getElementById('riskMsg');
+            m.innerText = isNaN(rp) ? "" : `🛡️ Risk: Rp ${Math.floor(rp).toLocaleString()}`;
+            m.style.color = p > 5 ? 'var(--danger)' : 'var(--safe)';
+        }
+
+        async function sync(trade, type) {
+            if(CLOUD_URL.includes("ISI_LINK")) return;
+            const data = {
+                type: type, date: trade.date, asset: trade.asset, side: trade.side,
+                entry: trade.entry, exit: trade.exit || '-', status: trade.status,
+                riskRp: Math.floor(trade.riskRp), leverage: trade.leverage.toFixed(4), equityAfter: Math.floor(trade.equityAfter)
+            };
+            try { fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) }); } catch(e){}
         }
 
         function executeTrade() {
             const asset = document.getElementById('asset').value.toUpperCase();
-            const riskP = parseFloat(document.getElementById('riskPct').value);
-            const entry = parseFloat(document.getElementById('entry').value);
+            const rP = parseFloat(document.getElementById('riskP').value);
+            const ent = parseFloat(document.getElementById('entry').value);
             const sl = parseFloat(document.getElementById('sl').value);
             const type = (currentView === 'crypto') ? 'crypto' : 'saham';
-            let activeBal = type === 'saham' ? balSaham : balCrypto;
+            let active = type === 'saham' ? balS : balC;
 
-            if(!asset || isNaN(entry) || isNaN(sl) || activeBal === 0) return alert("Cek data / Modal masih 0!");
+            if(!asset || isNaN(ent) || isNaN(sl) || active === 0) return alert("Cek Input / Modal!");
 
-            const riskRp = activeBal * (riskP / 100);
-            const leverage = Math.abs(riskRp / (entry - sl));
-            const trade = { asset, riskRp, leverage, entry, sl, side: currentSide, status: 'PENDING', exit: null, equityAfter: activeBal };
+            const riskRp = active * (rP / 100);
+            const lev = Math.abs(riskRp / (ent - sl));
+            const trade = { 
+                date: new Date().toLocaleDateString('id-ID'),
+                asset, riskRp, leverage: lev, entry: ent, sl, 
+                side: currentSide, status: 'OPEN', exit: null, equityAfter: active 
+            };
             
-            if(type === 'saham') histSaham.push(trade); else histCrypto.push(trade);
-            save(); updateUI(); 
-            syncToCloud(trade, type); // Panggil fungsi sync ke Google Sheets
+            if(type === 'saham') histS.push(trade); else histC.push(trade);
+            save(); updateUI(); sync(trade, type === 'saham' ? 'Saham' : 'Crypto');
             
             document.getElementById('asset').value = ''; document.getElementById('entry').value = ''; document.getElementById('sl').value = '';
         }
 
+        function updateExit(idx, val, type) {
+            let list = type === 'saham' ? histS : histC;
+            list[idx].exit = val;
+            list[idx].status = val ? 'CLOSED' : 'OPEN';
+            save(); updateUI();
+        }
+
         function updateUI() {
-            document.getElementById('totalEquity').innerText = `Rp ${(balSaham + balCrypto).toLocaleString('id-ID')}`;
+            document.getElementById('totalEquity').innerText = `Rp ${(balS + balC).toLocaleString('id-ID')}`;
             const body = document.getElementById('ledgerBody'); body.innerHTML = '';
-            let activeHist = currentView === 'crypto' ? histCrypto : (currentView === 'saham' ? histSaham : [...histSaham, ...histCrypto]);
+            let active = currentView === 'crypto' ? histC : (currentView === 'saham' ? histS : [...histS, ...histC]);
             
-            activeHist.slice().reverse().forEach((t, i) => {
+            active.slice().reverse().forEach((t, i) => {
+                let realIdx = active.length - 1 - i;
                 body.insertAdjacentHTML('beforeend', `
                     <tr>
-                        <td><b>${t.asset}</b></td>
-                        <td>${Math.floor(t.riskRp).toLocaleString('id-ID')}</td>
-                        <td style="color:var(--accent)">${t.leverage.toFixed(3)}</td>
+                        <td style="color:#666">${t.date}</td>
+                        <td><b>${t.asset}</b><br><small>${t.side}</small></td>
+                        <td style="color:var(--accent)">${t.leverage.toFixed(2)}</td>
                         <td>${t.entry.toLocaleString()}</td>
-                        <td>-</td>
+                        <td><input type="number" class="exit-input" value="${t.exit||''}" onchange="updateExit(${realIdx}, this.value, '${currentView==='crypto'?'crypto':'saham'}')"></td>
                         <td style="color:var(--accent)">${t.status}</td>
                     </tr>
                 `);
             });
-            renderChart();
         }
 
-        function renderChart() {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            if(mainChart) mainChart.destroy();
-            mainChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Saham', 'Crypto'], datasets: [{ data: [balSaham, balCrypto], backgroundColor: ['#34eb77', '#00d2ff'], borderWidth: 0 }] }, options: { maintainAspectRatio: false } });
-        }
-
-        function save() { localStorage.setItem('n_s_bal', balSaham); localStorage.setItem('n_c_bal', balCrypto); localStorage.setItem('n_s_hist', JSON.stringify(histSaham)); localStorage.setItem('n_c_hist', JSON.stringify(histCrypto)); }
-        function setSide(s) { currentSide = s; document.getElementById('longBtn').className = s === 'LONG' ? 'ls-btn active-long' : 'ls-btn'; document.getElementById('shortBtn').className = s === 'SHORT' ? 'ls-btn active-short' : 'ls-btn'; }
-        function initAUM() { balSaham = parseFloat(document.getElementById('initSaham').value) || 0; balCrypto = parseFloat(document.getElementById('initCrypto').value) || 0; save(); updateUI(); toggleSidebar(); }
-        function clearAll() { if(confirm("FORMAT DATABASE?")) { localStorage.clear(); location.reload(); } }
+        function save() { localStorage.setItem('n_s_bal', balS); localStorage.setItem('n_c_bal', balC); localStorage.setItem('n_s_hist', JSON.stringify(histS)); localStorage.setItem('n_c_hist', JSON.stringify(histC)); }
+        function setSide(s) { currentSide = s; document.getElementById('btnL').className = s === 'LONG' ? 'ls-btn active-long' : 'ls-btn'; document.getElementById('btnS').className = s === 'SHORT' ? 'ls-btn active-short' : 'ls-btn'; }
+        function initAUM() { balS = parseFloat(document.getElementById('initSaham').value) || 0; balC = parseFloat(document.getElementById('initCrypto').value) || 0; save(); updateUI(); toggleSidebar(); }
+        function clearAll() { if(confirm("Format DB?")) { localStorage.clear(); location.reload(); } }
         updateUI();
     </script>
 </body>
