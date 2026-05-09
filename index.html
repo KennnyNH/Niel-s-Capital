@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cans Capital | V1.2 Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #050505; --bg-panel: #0f0f0f; --accent: #d4af37;
+            --text-main: #d1d1d1; --border: #2a2a2a; --danger: #eb4034; --safe: #34eb77;
+            --crypto-color: #00d2ff; --saham-color: #34eb77;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px; font-size: 13px; }
+        .header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .header h1 { color: var(--accent); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .grid-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 1024px) { .grid-container { grid-template-columns: 1fr 1fr; } }
+
+        .panel { background-color: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 6px; }
+        h3 { color: var(--accent); margin-top: 0; font-size: 14px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; text-transform: uppercase; }
+        
+        label { display: block; margin-bottom: 4px; color: #888; font-size: 11px; text-transform: uppercase; }
+        input[type="text"], input[type="number"], input[type="file"], select { width: 100%; padding: 10px; margin-bottom: 12px; background: #0a0a0a; border: 1px solid var(--border); color: #fff; box-sizing: border-box; border-radius: 4px; }
+        
+        button { width: 100%; padding: 12px; background-color: var(--accent); color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; transition: 0.2s; }
+        button:hover { background-color: #bfa030; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-bottom: 5px; }
+        .btn-outline:hover { background: rgba(212, 175, 55, 0.1); }
+        
+        .radio-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .radio-group label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #fff; cursor: pointer; background: #1a1a1a; padding: 8px 15px; border-radius: 4px; border: 1px solid var(--border); flex: 1; justify-content: center;}
+        .radio-group input[type="radio"] { width: auto; margin: 0; }
+        
+        .balance-box { display: flex; gap: 15px; justify-content: flex-end; }
+        .balance-item { text-align: right; }
+        
+        /* Chart Container */
+        .chart-container { position: relative; height: 250px; width: 100%; margin-top: 10px;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 11px; }
+        .th-saham { color: var(--saham-color); background: #0a0a0a;}
+        .th-crypto { color: var(--crypto-color); background: #0a0a0a;}
+        
+        .footer { text-align: center; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid var(--border); padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>CANS CAPITAL</h1>
+            <div style="font-size: 10px; color: #555;">SYSTEM V1.2 // ANALYTICS DASHBOARD</div>
+        </div>
+        <div class="balance-box">
+            <div class="balance-item">
+                <div style="font-size: 10px; color: var(--crypto-color);">AUM CRYPTO</div>
+                <div id="balCrypto" style="font-size: 16px; font-weight: bold; color: #fff;">Rp 0</div>
+            </div>
+            <div class="balance-item">
+                <div style="font-size: 10px; color: var(--saham-color);">AUM SAHAM</div>
+                <div id="balSaham" style="font-size: 16px; font-weight: bold; color: #fff;">Rp 0</div>
+            </div>
+            <div class="balance-item" style="border-left: 1px solid var(--border); padding-left: 15px;">
+                <div style="font-size: 10px; color: var(--accent);">TOTAL EQUITY</div>
+                <div id="balTotal" style="font-size: 22px; font-weight: bold; color: var(--accent);">Rp 0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-bottom: 15px;">
+        <h3>📊 Portfolio Analytics</h3>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div style="flex: 1;">
+                <label>Pilih Mode Grafik</label>
+                <select id="chartMode" onchange="renderChart()" style="margin-bottom: 0;">
+                    <option value="pie">Mode Lingkaran (Alokasi Portfolio)</option>
+                    <option value="line">Mode Garis (Equity Curve Saham)</option>
+                    <option value="bar">Mode Batang (Equity Curve Crypto)</option>
+                </select>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="portfolioChart"></canvas>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        
+        <div class="panel">
+            <h3>⚔️ Order Execution</h3>
+            <div class="radio-group">
+                <label style="border-color: var(--saham-color);"><input type="radio" name="assetType" value="saham" checked> Saham Lokal</label>
+                <label style="border-color: var(--crypto-color);"><input type="radio" name="assetType" value="crypto"> Crypto / On-Chain</label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><label>Kode Aset</label><input type="text" id="asset" placeholder="BBRI / BTC"></div>
+                <div><label>Risk (%)</label><input type="number" id="riskPct" value="2"></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div><label>Entry</label><input type="number" id="entry"></div>
+                <div><label>Stop Loss</label><input type="number" id="sl"></div>
+                <div><label>Take Profit</label><input type="number" id="tp"></div>
+            </div>
+            <button onclick="executeTrade()">Eksekusi Order</button>
+        </div>
+
+        <div class="panel">
+            <h3>📂 CSV Data Injector</h3>
+            <div class="radio-group">
+                <label><input type="radio" name="injectType" value="saham" checked> Ke Saham</label>
+                <label><input type="radio" name="injectType" value="crypto"> Ke Crypto</label>
+            </div>
+            <input type="file" id="csvFile" accept=".csv" style="border: 1px dashed var(--border); padding: 10px; cursor: pointer;">
+            <button onclick="injectCSV()" style="background: #fff; color: #000; margin-bottom: 10px;">⚡ Inject Data</button>
+            
+            <h3 style="margin-top: 20px;">💾 Database Management</h3>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-outline" onclick="exportData('saham')" style="color: var(--saham-color); border-color: var(--saham-color);">📥 Backup Saham</button>
+                <button class="btn-outline" onclick="exportData('crypto')" style="color: var(--crypto-color); border-color: var(--crypto-color);">📥 Backup Crypto</button>
+            </div>
+            <button onclick="clearHistory()" style="background: #333; color: var(--danger); margin-top: 5px;">⚠️ Format All Database</button>
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1;">
+            <h3 style="color: var(--saham-color); border-bottom-color: var(--saham-color);">📓 Ledger: Portofolio Saham</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th class="th-saham">Date</th><th class="th-saham">Asset</th><th class="th-saham">Risk (Rp)</th><th class="th-saham">R/R</th><th class="th-saham">Status</th><th class="th-saham">Equity Saham</th></tr>
+                    </thead>
+                    <tbody id="sahamBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1;">
+            <h3 style="color: var(--crypto-color); border-bottom-color: var(--crypto-color);">📓 Ledger: Portofolio Crypto</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th class="th-crypto">Date</th><th class="th-crypto">Asset</th><th class="th-crypto">Risk (Rp)</th><th class="th-crypto">R/R</th><th class="th-crypto">Status</th><th class="th-crypto">Equity Crypto</th></tr>
+                    </thead>
+                    <tbody id="cryptoBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">&copy; 2026 Cans Capital. V1.2 Engineered by <b>Kenny Nathaniel Haryanto</b></div>
+
+    <script>
+        let balSaham = parseFloat(localStorage.getItem('cans_saham_bal')) || 800000;
+        let balCrypto = parseFloat(localStorage.getItem('cans_crypto_bal')) || 200000;
+        let histSaham = JSON.parse(localStorage.getItem('cans_saham_hist')) || [];
+        let histCrypto = JSON.parse(localStorage.getItem('cans_crypto_hist')) || [];
+        let chartInstance = null; // Variabel penyimpan grafik
+
+        function updateUI() {
+            document.getElementById('balSaham').innerText = `Rp ${balSaham.toLocaleString('id-ID')}`;
+            document.getElementById('balCrypto').innerText = `Rp ${balCrypto.toLocaleString('id-ID')}`;
+            document.getElementById('balTotal').innerText = `Rp ${(balSaham + balCrypto).toLocaleString('id-ID')}`;
+            
+            renderTable(histSaham, 'sahamBody', 'saham');
+            renderTable(histCrypto, 'cryptoBody', 'crypto');
+            renderChart(); // Otomatis update grafik tiap ada perubahan saldo
+        }
+
+        // --- SISTEM CHART.JS (BARU) ---
+        function renderChart() {
+            const ctx = document.getElementById('portfolioChart').getContext('2d');
+            const mode = document.getElementById('chartMode').value;
+
+            // Hancurkan grafik lama biar nggak tumpang tindih
+            if (chartInstance) chartInstance.destroy();
+
+            // Set warna tulisan keterangan grafik jadi putih biar kelihatan di tema gelap
+            Chart.defaults.color = '#888';
+
+            let config = {};
+
+            if (mode === 'pie') {
+                config = {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Saham Lokal', 'Crypto On-Chain'],
+                        datasets: [{
+                            data: [balSaham, balCrypto],
+                            backgroundColor: ['#34eb77', '#00d2ff'],
+                            borderWidth: 0, hoverOffset: 4
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                };
+            } else if (mode === 'line') {
+                config = {
+                    type: 'line',
+                    data: {
+                        labels: histSaham.map((t, i) => `Trade ${i+1} (${t.asset})`),
+                        datasets: [{
+                            label: 'Pertumbuhan Saldo Saham (Rp)',
+                            data: histSaham.map(t => t.equityAfter),
+                            borderColor: '#34eb77', backgroundColor: 'rgba(52, 235, 119, 0.1)',
+                            borderWidth: 2, fill: true, tension: 0.3
+                        }]
+                    },
+                    options: { maintainAspectRatio: false }
+                };
+            } else if (mode === 'bar') {
+                config = {
+                    type: 'bar',
+                    data: {
+                        labels: histCrypto.map((t, i) => `Trade ${i+1} (${t.asset})`),
+                        datasets: [{
+                            label: 'Pertumbuhan Saldo Crypto (Rp)',
+                            data: histCrypto.map(t => t.equityAfter),
+                            backgroundColor: '#00d2ff', borderRadius: 4
+                        }]
+                    },
+                    options: { maintainAspectRatio: false }
+                };
+            }
+
+            chartInstance = new Chart(ctx, config);
+        }
+
+        function renderTable(historyArr, tbodyId, type) {
+            const body = document.getElementById(tbodyId);
+            body.innerHTML = '';
+            [...historyArr].reverse().forEach((t, indexRev) => {
+                const i = historyArr.length - 1 - indexRev;
+                const row = `<tr>
+                    <td>${t.date}</td><td><b>${t.asset}</b></td><td>Rp ${t.riskRp.toLocaleString('id-ID')}</td>
+                    <td style="color:${t.rr >= 2 ? 'var(--safe)' : 'var(--danger)'}">1:${t.rr.toFixed(1)}</td>
+                    <td>
+                        <select onchange="updateResult(${i}, this.value, '${type}')" style="background:#000; color:#fff; border:1px solid #444; font-size:10px; padding:3px;">
+                            <option value="pending" ${t.result === 'pending' ? 'selected' : ''}>PENDING</option>
+                            <option value="win" ${t.result === 'win' ? 'selected' : ''}>WIN</option>
+                            <option value="loss" ${t.result === 'loss' ? 'selected' : ''}>LOSS</option>
+                        </select>
+                    </td>
+                    <td style="font-weight:bold;">Rp ${t.equityAfter.toLocaleString('id-ID')}</td>
+                </tr>`;
+                body.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function executeTrade() {
+            const type = document.querySelector('input[name="assetType"]:checked').value;
+            const asset = document.getElementById('asset').value.toUpperCase();
+            const riskP = parseFloat(document.getElementById('riskPct').value);
+            const entry = parseFloat(document.getElementById('entry').value);
+            const sl = parseFloat(document.getElementById('sl').value);
+            const tp = parseFloat(document.getElementById('tp').value);
+            if(!entry || !sl || !tp) return alert("Lengkapi data!");
+            processTrade(type, asset, riskP, entry, sl, tp, 'pending');
+        }
+
+        function processTrade(type, asset, riskPct, entry, sl, tp, resultStatus) {
+            let activeBal = type === 'saham' ? balSaham : balCrypto;
+            const riskRp = activeBal * (riskPct / 100);
+            const rr = Math.abs(tp - entry) / Math.abs(entry - sl);
+            if (resultStatus === 'win') activeBal += (riskRp * rr);
+            else if (resultStatus === 'loss') activeBal -= riskRp;
+            const tradeObj = { date: new Date().toLocaleDateString(), asset, riskRp, rr, result: resultStatus, equityAfter: activeBal };
+            if(type === 'saham') { balSaham = activeBal; histSaham.push(tradeObj); }
+            else { balCrypto = activeBal; histCrypto.push(tradeObj); }
+            save(); updateUI();
+        }
+
+        function injectCSV() {
+            const type = document.querySelector('input[name="injectType"]:checked').value;
+            const file = document.getElementById('csvFile').files[0];
+            if (!file) return alert("Pilih CSV!");
+            Papa.parse(file, {
+                header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    let count = 0;
+                    results.data.forEach(row => {
+                        if(row.Asset && row.Entry && row.StopLoss && row.TakeProfit) {
+                            processTrade(type, row.Asset.toUpperCase(), parseFloat(row.RiskPct)||2, parseFloat(row.Entry), parseFloat(row.StopLoss), parseFloat(row.TakeProfit), (row.Result||'pending').toLowerCase());
+                            count++;
+                        }
+                    });
+                    alert(`SUKSES! ${count} trade masuk ke Ledger ${type.toUpperCase()}.`);
+                    document.getElementById('csvFile').value = "";
+                }
+            });
+        }
+
+        function updateResult(index, res, type) {
+            let arr = type === 'saham' ? histSaham : histCrypto;
+            let currentBal = type === 'saham' ? balSaham : balCrypto;
+            const t = arr[index];
+            if(t.result === 'win') currentBal -= (t.riskRp * t.rr);
+            if(t.result === 'loss') currentBal += t.riskRp;
+            t.result = res;
+            if(res === 'win') currentBal += (t.riskRp * t.rr);
+            if(res === 'loss') currentBal -= t.riskRp;
+            t.equityAfter = currentBal;
+            let tempBal = currentBal;
+            for(let i = index + 1; i < arr.length; i++) {
+                if(arr[i].result === 'win') tempBal += (arr[i].riskRp * arr[i].rr);
+                else if(arr[i].result === 'loss') tempBal -= arr[i].riskRp;
+                arr[i].equityAfter = tempBal;
+            }
+            if(type === 'saham') balSaham = tempBal; else balCrypto = tempBal;
+            save(); updateUI();
+        }
+
+        function exportData(type) {
+            let arr = type === 'saham' ? histSaham : histCrypto;
+            if(arr.length === 0) return alert("Data kosong!");
+            const exportData = arr.map(t => ({
+                Asset: t.asset, RiskPct: (t.riskRp / (t.equityAfter - (t.result==='win'? t.riskRp*t.rr : (t.result==='loss'? -t.riskRp : 0)))) * 100,
+                Entry: 0, StopLoss: 0, TakeProfit: 0, Result: t.result, LogDate: t.date, FinalEquity: t.equityAfter
+            }));
+            const csv = Papa.unparse(exportData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `CansCapital_${type.toUpperCase()}_Backup.csv`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function save() {
+            localStorage.setItem('cans_saham_bal', balSaham); localStorage.setItem('cans_crypto_bal', balCrypto);
+            localStorage.setItem('cans_saham_hist', JSON.stringify(histSaham)); localStorage.setItem('cans_crypto_hist', JSON.stringify(histCrypto));
+        }
+        function clearHistory() { if(confirm("FORMAT SEMUA DATABASE? Saham ke 800k, Crypto ke 200k.")) { localStorage.clear(); location.reload(); } }
+
+        updateUI();
+    </script>
+</body>
+</html>
