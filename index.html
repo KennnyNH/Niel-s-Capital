@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niel's Capital | V1.5 Strategic Terminal</title>
+    <title>Niel's Capital | V1.6 Clean UI</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,37 +14,49 @@
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px; font-size: 13px; }
         
-        /* Header & Navigation */
+        /* Header & Balance */
         .header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .header h1 { color: var(--accent); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
-        
-        .menu-trigger { color: var(--accent); font-size: 24px; cursor: pointer; background: none; border: none; padding: 5px; }
-        .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--accent); transition: 0.3s; z-index: 1000; padding: 20px; box-sizing: border-box; }
-        .sidebar.active { left: 0; }
-        .sidebar h2 { color: var(--accent); font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .nav-item { padding: 12px; cursor: pointer; color: #fff; border-bottom: 1px solid #1a1a1a; transition: 0.2s; display: block; text-decoration: none; }
-        .nav-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--accent); }
-
-        /* General Layout */
-        .panel { background-color: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        h3 { color: var(--accent); margin-top: 0; font-size: 14px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 8px; display: flex; justify-content: space-between; }
-        
-        label { display: block; margin-bottom: 4px; color: #888; font-size: 10px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 12px; background: #0a0a0a; border: 1px solid var(--border); color: #fff; box-sizing: border-box; border-radius: 4px; }
-        
-        button { width: 100%; padding: 12px; background-color: var(--accent); color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; }
-        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
-        
         .balance-display { text-align: right; }
         .balance-val { font-size: 18px; font-weight: bold; color: #fff; }
 
+        /* Sidebar Menu (Laci Kanan) */
+        .sidebar { position: fixed; top: 0; right: -300px; width: 300px; height: 100%; background: #0a0a0a; border-left: 1px solid var(--accent); transition: right 0.3s ease; z-index: 1000; padding: 20px; box-sizing: border-box; box-shadow: -5px 0 15px rgba(0,0,0,0.5); overflow-y: auto; }
+        .sidebar.active { right: 0; }
+        .sidebar h2 { color: var(--accent); font-size: 16px; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .nav-item { padding: 12px; cursor: pointer; color: #fff; border-bottom: 1px solid #1a1a1a; transition: 0.2s; font-weight: bold; }
+        .nav-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--accent); }
+        
+        /* AUM Input di Sidebar */
+        .sidebar-section { margin-top: 25px; background: #111; padding: 15px; border-radius: 6px; border: 1px solid var(--border); }
+        .sidebar-section h3 { font-size: 12px; margin-bottom: 10px; color: #888; border: none; padding: 0; }
+        .sidebar-section input { width: 100%; padding: 10px; margin-bottom: 10px; background: #000; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 4px; }
+        .sidebar-section button { width: 100%; padding: 10px; background: var(--accent); color: #000; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
+
+        /* Panels & General */
+        .panel { background-color: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        
+        /* Fix Hamburger Menu Alignment */
+        h3.panel-title { display: flex; justify-content: space-between; align-items: center; color: var(--accent); margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+        .menu-trigger { color: var(--accent); font-size: 20px; cursor: pointer; background: none; border: none; padding: 0; margin-left: auto; }
+        
+        label { display: block; margin-bottom: 4px; color: #888; font-size: 10px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 12px; background: #0a0a0a; border: 1px solid var(--border); color: #fff; box-sizing: border-box; border-radius: 4px; }
+        button.btn-main { width: 100%; padding: 12px; background-color: var(--accent); color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; }
+        
+        /* Chart Toggles (Icon Only) */
+        .chart-toggles { display: flex; gap: 10px; margin-bottom: 15px; }
+        .toggle-btn { background: #111; border: 1px solid var(--border); color: #fff; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .toggle-btn:hover, .toggle-btn.active { border-color: var(--accent); background: rgba(212, 175, 55, 0.1); }
+
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        
         /* Toggle Long/Short */
         .ls-toggle { display: flex; gap: 10px; margin-bottom: 12px; }
         .ls-btn { flex: 1; padding: 8px; border: 1px solid var(--border); background: #1a1a1a; color: #888; border-radius: 4px; cursor: pointer; text-align: center; font-weight: bold; }
         .ls-btn.active-long { border-color: var(--safe); color: var(--safe); background: rgba(52, 235, 119, 0.1); }
         .ls-btn.active-short { border-color: var(--danger); color: var(--danger); background: rgba(235, 64, 52, 0.1); }
 
-        .chart-container { height: 250px; width: 100%; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
         th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
         .status-win { color: var(--safe); font-weight: bold; }
@@ -52,6 +64,9 @@
         .status-pending { color: var(--accent); font-weight: bold; }
 
         .footer { text-align: center; margin-top: 30px; font-size: 10px; color: #555; }
+        
+        .grid-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 1024px) { .grid-container { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
@@ -61,7 +76,20 @@
         <div class="nav-item" onclick="switchView('all')">🏠 TOTAL PORTFOLIO</div>
         <div class="nav-item" onclick="switchView('saham')">🟢 SAHAM TERMINAL</div>
         <div class="nav-item" onclick="switchView('crypto')">🔵 CRYPTO TERMINAL</div>
-        <div class="nav-item" onclick="toggleSidebar()" style="color: var(--danger); margin-top: 20px;">✖ CLOSE MENU</div>
+        
+        <div class="sidebar-section">
+            <h3>⚙️ SET ASSET UNDER MANAGEMENT</h3>
+            <input type="number" id="initSaham" placeholder="Modal Saham (Rp)">
+            <input type="number" id="initCrypto" placeholder="Modal Crypto (Rp)">
+            <button onclick="initAUM()">SIMPAN AUM</button>
+            <p style="font-size: 9px; color: #666; margin-top: 8px; margin-bottom: 0;">*Menyimpan AUM akan mereset grafik chart dari nol.</p>
+        </div>
+
+        <div class="sidebar-section" style="border-color: #311; background: #1a0505;">
+            <button onclick="clearAll()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger);">⚠️ FORMAT DATABASE</button>
+        </div>
+
+        <div class="nav-item" onclick="toggleSidebar()" style="color: var(--danger); margin-top: 20px; text-align: center; border: none;">✖ TUTUP MENU</div>
     </div>
 
     <div class="header">
@@ -70,84 +98,109 @@
             <div id="viewIndicator" style="font-size: 10px; color: var(--accent);">VIEW: TOTAL PORTFOLIO</div>
         </div>
         <div class="balance-display">
-            <div style="font-size: 10px; color: #888;">EQUITY AUM</div>
+            <div style="font-size: 10px; color: #888;">TOTAL EQUITY AUM</div>
             <div id="totalEquity" class="balance-val">Rp 0</div>
         </div>
     </div>
 
     <div class="panel">
-        <h3>
-            <span>📊 Portfolio Analytics</span>
+        <h3 class="panel-title">
+            <span>📊 PORTFOLIO ANALYTICS</span>
             <button class="menu-trigger" onclick="toggleSidebar()">☰</button>
         </h3>
+        
+        <div class="chart-toggles">
+            <button class="toggle-btn active" id="btnChartPie" onclick="setChartType('pie')" title="Lingkaran">⭕</button>
+            <button class="toggle-btn" id="btnChartLine" onclick="setChartType('line')" title="Garis">📈</button>
+            <button class="toggle-btn" id="btnChartBar" onclick="setChartType('bar')" title="Batang">📊</button>
+        </div>
+
         <div class="chart-container">
             <canvas id="mainChart"></canvas>
         </div>
     </div>
 
-    <div class="panel" id="executionPanel">
-        <h3 id="execTitle">⚔️ EXECUTION: SAHAM</h3>
-        <div class="ls-toggle">
-            <div id="longBtn" class="ls-btn active-long" onclick="setSide('LONG')">LONG</div>
-            <div id="shortBtn" class="ls-btn" onclick="setSide('SHORT')">SHORT</div>
+    <div class="grid-container">
+        <div class="panel" id="executionPanel">
+            <h3 class="panel-title">⚔️ EXECUTION ENGINE</h3>
+            <div class="ls-toggle">
+                <div id="longBtn" class="ls-btn active-long" onclick="setSide('LONG')">LONG</div>
+                <div id="shortBtn" class="ls-btn" onclick="setSide('SHORT')">SHORT</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><label>Kode Aset</label><input type="text" id="asset" placeholder="BBRI / BTC"></div>
+                <div><label>Risk (%)</label><input type="number" id="riskPct" value="2"></div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div><label>Entry Price</label><input type="number" id="entry"></div>
+                <div><label>Exit Price (Kosong = Pending)</label><input type="number" id="exit"></div>
+                <div><label>Stop Loss</label><input type="number" id="sl"></div>
+            </div>
+            <button class="btn-main" onclick="executeTrade()" id="btnSubmit">Confirm Execution</button>
         </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label>Kode Aset</label><input type="text" id="asset" placeholder="BBRI / BTC"></div>
-            <div><label>Risk (%)</label><input type="number" id="riskPct" value="2"></div>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-            <div><label>Entry Price</label><input type="number" id="entry"></div>
-            <div><label>Exit Price (Kosong = Pending)</label><input type="number" id="exit"></div>
-            <div><label>Stop Loss</label><input type="number" id="sl"></div>
-        </div>
-        <button onclick="executeTrade()" id="btnSubmit">Confirm Execution</button>
-    </div>
 
-    <div class="panel">
-        <h3 id="ledgerTitle">📓 Transaction Ledger</h3>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th><th>Asset</th><th>Side</th><th>Entry</th><th>Exit</th><th>Status</th><th>Equity After</th>
-                    </tr>
-                </thead>
-                <tbody id="ledgerBody"></tbody>
-            </table>
+        <div class="panel">
+            <h3 class="panel-title">📓 TRANSACTION LEDGER</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th><th>Asset</th><th>Side</th><th>Entry</th><th>Exit</th><th>Status</th><th>Equity After</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerBody"></tbody>
+                </table>
+            </div>
         </div>
-    </div>
-
-    <div class="panel" style="border-style: dashed;">
-        <h3>📂 Database & Initialization</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <input type="number" id="initSaham" placeholder="Initial Saham">
-            <input type="number" id="initCrypto" placeholder="Initial Crypto">
-        </div>
-        <button class="btn-outline" onclick="initAUM()">Initialize Funds</button>
-        <button onclick="clearAll()" style="background:#333; color:red; margin-top:10px;">Wipe All Data</button>
     </div>
 
     <div class="footer">&copy; 2026 Niel's Capital. Founder: <b>Kenny Nathaniel Haryanto</b></div>
 
     <script>
-        let currentView = 'all';
+        let currentView = 'all'; // all, saham, crypto
         let currentSide = 'LONG';
-        let balSaham = parseFloat(localStorage.getItem('n_s_bal')) || 0;
-        let balCrypto = parseFloat(localStorage.getItem('n_c_bal')) || 0;
+        let currentChartType = 'pie'; // pie, line, bar
+        
+        // Database
+        let balSaham = parseFloat(localStorage.getItem('n_s_bal'));
+        let balCrypto = parseFloat(localStorage.getItem('n_c_bal'));
+        if(isNaN(balSaham)) balSaham = 0; if(isNaN(balCrypto)) balCrypto = 0;
+        
         let histSaham = JSON.parse(localStorage.getItem('n_s_hist')) || [];
         let histCrypto = JSON.parse(localStorage.getItem('n_c_hist')) || [];
         let mainChart = null;
 
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+        // UI Functions
+        function toggleSidebar() { 
+            const sb = document.getElementById('sidebar');
+            sb.classList.toggle('active'); 
+        }
 
         function switchView(view) {
             currentView = view;
             document.getElementById('viewIndicator').innerText = `VIEW: ${view.toUpperCase()} TERMINAL`;
-            document.getElementById('execTitle').innerText = `⚔️ EXECUTION: ${view === 'all' ? 'SAHAM' : view.toUpperCase()}`;
             toggleSidebar();
+            
+            // Set default chart cerdas
+            if(view === 'all') setChartType('pie');
+            else setChartType('line');
+            
             updateUI();
+        }
+
+        function setChartType(type) {
+            currentChartType = type;
+            document.getElementById('btnChartPie').classList.remove('active');
+            document.getElementById('btnChartLine').classList.remove('active');
+            document.getElementById('btnChartBar').classList.remove('active');
+            
+            if(type === 'pie') document.getElementById('btnChartPie').classList.add('active');
+            if(type === 'line') document.getElementById('btnChartLine').classList.add('active');
+            if(type === 'bar') document.getElementById('btnChartBar').classList.add('active');
+            
+            renderChart();
         }
 
         function setSide(side) {
@@ -156,11 +209,25 @@
             document.getElementById('shortBtn').className = side === 'SHORT' ? 'ls-btn active-short' : 'ls-btn';
         }
 
+        function initAUM() {
+            const ns = parseFloat(document.getElementById('initSaham').value);
+            const nc = parseFloat(document.getElementById('initCrypto').value);
+            if(isNaN(ns) || isNaN(nc)) return alert("Masukkan nominal modal!");
+            balSaham = ns; balCrypto = nc;
+            histSaham = []; histCrypto = []; // Reset history if new AUM is set
+            save(); updateUI();
+            document.getElementById('initSaham').value = '';
+            document.getElementById('initCrypto').value = '';
+            toggleSidebar();
+            alert("AUM Berhasil Di-set!");
+        }
+
         function updateUI() {
             const total = balSaham + balCrypto;
             document.getElementById('totalEquity').innerText = `Rp ${total.toLocaleString('id-ID')}`;
             
-            const activeHist = currentView === 'crypto' ? histCrypto : histSaham;
+            const activeHist = currentView === 'crypto' ? histCrypto : (currentView === 'saham' ? histSaham : [...histSaham, ...histCrypto]);
+            
             const body = document.getElementById('ledgerBody');
             body.innerHTML = '';
             
@@ -186,9 +253,12 @@
             const entry = parseFloat(document.getElementById('entry').value);
             const exit = parseFloat(document.getElementById('exit').value);
             const riskPct = parseFloat(document.getElementById('riskPct').value);
+            
+            // Kalau View All, lempar ke Saham by default
             const type = (currentView === 'all' || currentView === 'saham') ? 'saham' : 'crypto';
             
-            if(!asset || !entry) return alert("Minimal isi Kode Aset & Entry!");
+            if(!asset || isNaN(entry)) return alert("Minimal isi Kode Aset & Entry!");
+            if(balSaham === 0 && balCrypto === 0) return alert("Buka Menu (☰), set Modal AUM dulu!");
 
             let status = 'PENDING';
             let activeBal = type === 'saham' ? balSaham : balCrypto;
@@ -198,16 +268,11 @@
                 if(currentSide === 'LONG') status = exit > entry ? 'WIN' : 'LOSS';
                 else status = exit < entry ? 'WIN' : 'LOSS';
                 
-                // Kalkulasi profit (simulasi R/R fixed 1:2 jika win)
                 if(status === 'WIN') activeBal += (riskRp * 2);
                 else activeBal -= riskRp;
             }
 
-            const trade = {
-                date: new Date().toLocaleDateString(),
-                asset, entry, exit, side: currentSide,
-                status, riskRp, equityAfter: activeBal
-            };
+            const trade = { date: new Date().toLocaleDateString('id-ID'), asset, entry, exit, side: currentSide, status, riskRp, equityAfter: activeBal };
 
             if(type === 'saham') { balSaham = activeBal; histSaham.push(trade); }
             else { balCrypto = activeBal; histCrypto.push(trade); }
@@ -222,19 +287,29 @@
             Chart.defaults.color = '#888';
 
             let config = {};
-            if(currentView === 'all') {
-                config = { type: 'doughnut', data: { labels: ['Saham', 'Crypto'], datasets: [{ data: [balSaham, balCrypto], backgroundColor: ['#34eb77', '#00d2ff'], borderWidth: 0 }] }, options: { maintainAspectRatio: false } };
-            } else {
-                const hist = currentView === 'saham' ? histSaham : histCrypto;
-                config = { type: 'line', data: { labels: hist.map(t => t.asset), datasets: [{ label: `Growth ${currentView}`, data: hist.map(t => t.equityAfter), borderColor: currentView === 'saham' ? '#34eb77' : '#00d2ff', fill: false }] }, options: { maintainAspectRatio: false } };
+            let activeHist = currentView === 'crypto' ? histCrypto : histSaham;
+            let activeColor = currentView === 'crypto' ? '#00d2ff' : '#34eb77';
+
+            if(currentChartType === 'pie') {
+                config = { 
+                    type: 'doughnut', 
+                    data: { labels: ['Saham', 'Crypto'], datasets: [{ data: [balSaham, balCrypto], backgroundColor: ['#34eb77', '#00d2ff'], borderWidth: 0 }] }, 
+                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } 
+                };
+            } else if(currentChartType === 'line') {
+                config = { 
+                    type: 'line', 
+                    data: { labels: activeHist.map((t,i) => `#${i+1} ${t.asset}`), datasets: [{ label: 'Equity Curve', data: activeHist.map(t => t.equityAfter), borderColor: activeColor, borderWidth: 2, fill: false, tension: 0.2 }] }, 
+                    options: { maintainAspectRatio: false } 
+                };
+            } else if(currentChartType === 'bar') {
+                config = { 
+                    type: 'bar', 
+                    data: { labels: activeHist.map((t,i) => `#${i+1} ${t.asset}`), datasets: [{ label: 'Equity Growth', data: activeHist.map(t => t.equityAfter), backgroundColor: activeColor, borderRadius: 4 }] }, 
+                    options: { maintainAspectRatio: false } 
+                };
             }
             mainChart = new Chart(ctx, config);
-        }
-
-        function initAUM() {
-            balSaham = parseFloat(document.getElementById('initSaham').value) || 0;
-            balCrypto = parseFloat(document.getElementById('initCrypto').value) || 0;
-            save(); updateUI();
         }
 
         function save() {
@@ -242,7 +317,7 @@
             localStorage.setItem('n_s_hist', JSON.stringify(histSaham)); localStorage.setItem('n_c_hist', JSON.stringify(histCrypto));
         }
 
-        function clearAll() { if(confirm("Hapus semua data?")) { localStorage.clear(); location.reload(); } }
+        function clearAll() { if(confirm("Hapus semua data portofolio dari browser?")) { localStorage.clear(); location.reload(); } }
         updateUI();
     </script>
 </body>
