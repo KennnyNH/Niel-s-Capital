@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niel's Capital | V1.2 Pro-Guard</title>
+    <title>Niel's Capital | V1.5 Strategic Terminal</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,317 +13,236 @@
             --crypto-color: #00d2ff; --saham-color: #34eb77;
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px; font-size: 13px; }
-        .header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; }
-        .header h1 { color: var(--accent); margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-        .live-date { font-size: 11px; color: #888; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         
-        .grid-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 1024px) { .grid-container { grid-template-columns: 1fr 1fr; } }
+        /* Header & Navigation */
+        .header { border-bottom: 1px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { color: var(--accent); margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .menu-trigger { color: var(--accent); font-size: 24px; cursor: pointer; background: none; border: none; padding: 5px; }
+        .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--accent); transition: 0.3s; z-index: 1000; padding: 20px; box-sizing: border-box; }
+        .sidebar.active { left: 0; }
+        .sidebar h2 { color: var(--accent); font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .nav-item { padding: 12px; cursor: pointer; color: #fff; border-bottom: 1px solid #1a1a1a; transition: 0.2s; display: block; text-decoration: none; }
+        .nav-item:hover { background: rgba(212, 175, 55, 0.1); color: var(--accent); }
 
-        .panel { background-color: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 6px; }
-        h3 { color: var(--accent); margin-top: 0; font-size: 14px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; text-transform: uppercase; }
+        /* General Layout */
+        .panel { background-color: var(--bg-panel); border: 1px solid var(--border); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        h3 { color: var(--accent); margin-top: 0; font-size: 14px; text-transform: uppercase; border-bottom: 1px dashed var(--border); padding-bottom: 8px; display: flex; justify-content: space-between; }
         
-        label { display: block; margin-bottom: 4px; color: #888; font-size: 11px; text-transform: uppercase; }
-        input[type="text"], input[type="number"], input[type="file"], select { width: 100%; padding: 10px; margin-bottom: 12px; background: #0a0a0a; border: 1px solid var(--border); color: #fff; box-sizing: border-box; border-radius: 4px; }
+        label { display: block; margin-bottom: 4px; color: #888; font-size: 10px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 12px; background: #0a0a0a; border: 1px solid var(--border); color: #fff; box-sizing: border-box; border-radius: 4px; }
         
-        button { width: 100%; padding: 12px; background-color: var(--accent); color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; transition: 0.2s; }
-        button:hover { background-color: #bfa030; }
-        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-bottom: 5px; }
-        .btn-outline:hover { background: rgba(212, 175, 55, 0.1); }
-        .btn-danger { background: #1a0505; color: var(--danger); border: 1px solid var(--danger); }
+        button { width: 100%; padding: 12px; background-color: var(--accent); color: #000; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
         
-        .radio-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .radio-group label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #fff; cursor: pointer; background: #1a1a1a; padding: 8px 15px; border-radius: 4px; border: 1px solid var(--border); flex: 1; justify-content: center;}
-        .radio-group input[type="radio"] { width: auto; margin: 0; }
-        
-        .balance-box { display: flex; gap: 15px; justify-content: flex-end; flex-wrap: wrap; }
-        .balance-item { text-align: right; }
-        
-        /* Dashboard Tabs for Analytics */
-        .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;}
-        .tab-btn { background: transparent; border: 1px solid var(--border); color: #888; padding: 8px 15px; border-radius: 20px; font-size: 11px; width: auto; }
-        .tab-btn.active-saham { border-color: var(--saham-color); color: var(--saham-color); background: rgba(52, 235, 119, 0.1); }
-        .tab-btn.active-crypto { border-color: var(--crypto-color); color: var(--crypto-color); background: rgba(0, 210, 255, 0.1); }
-        .tab-btn.active-all { border-color: var(--accent); color: var(--accent); background: rgba(212, 175, 55, 0.1); }
+        .balance-display { text-align: right; }
+        .balance-val { font-size: 18px; font-weight: bold; color: #fff; }
 
-        .chart-container { position: relative; height: 250px; width: 100%; margin-top: 10px;}
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 11px; }
-        .th-saham { color: var(--saham-color); background: #0a0a0a;}
-        .th-crypto { color: var(--crypto-color); background: #0a0a0a;}
-        
-        #riskWarning { font-size: 11px; font-weight: bold; margin-top: -8px; margin-bottom: 12px; display: block; }
-        .footer { text-align: center; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid var(--border); padding-top: 10px; }
+        /* Toggle Long/Short */
+        .ls-toggle { display: flex; gap: 10px; margin-bottom: 12px; }
+        .ls-btn { flex: 1; padding: 8px; border: 1px solid var(--border); background: #1a1a1a; color: #888; border-radius: 4px; cursor: pointer; text-align: center; font-weight: bold; }
+        .ls-btn.active-long { border-color: var(--safe); color: var(--safe); background: rgba(52, 235, 119, 0.1); }
+        .ls-btn.active-short { border-color: var(--danger); color: var(--danger); background: rgba(235, 64, 52, 0.1); }
+
+        .chart-container { height: 250px; width: 100%; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
+        .status-win { color: var(--safe); font-weight: bold; }
+        .status-loss { color: var(--danger); font-weight: bold; }
+        .status-pending { color: var(--accent); font-weight: bold; }
+
+        .footer { text-align: center; margin-top: 30px; font-size: 10px; color: #555; }
     </style>
 </head>
 <body>
 
+    <div class="sidebar" id="sidebar">
+        <h2>NIEL'S CAPITAL MENU</h2>
+        <div class="nav-item" onclick="switchView('all')">🏠 TOTAL PORTFOLIO</div>
+        <div class="nav-item" onclick="switchView('saham')">🟢 SAHAM TERMINAL</div>
+        <div class="nav-item" onclick="switchView('crypto')">🔵 CRYPTO TERMINAL</div>
+        <div class="nav-item" onclick="toggleSidebar()" style="color: var(--danger); margin-top: 20px;">✖ CLOSE MENU</div>
+    </div>
+
     <div class="header">
         <div>
             <h1>NIEL'S CAPITAL</h1>
-            <div class="live-date" id="realTimeClock">Memuat Waktu...</div>
+            <div id="viewIndicator" style="font-size: 10px; color: var(--accent);">VIEW: TOTAL PORTFOLIO</div>
         </div>
-        <div class="balance-box">
-            <div class="balance-item">
-                <div style="font-size: 10px; color: var(--crypto-color);">AUM CRYPTO</div>
-                <div id="balCrypto" style="font-size: 16px; font-weight: bold; color: #fff;">Rp 0</div>
-            </div>
-            <div class="balance-item">
-                <div style="font-size: 10px; color: var(--saham-color);">AUM SAHAM</div>
-                <div id="balSaham" style="font-size: 16px; font-weight: bold; color: #fff;">Rp 0</div>
-            </div>
-            <div class="balance-item" style="border-left: 1px solid var(--border); padding-left: 15px;">
-                <div style="font-size: 10px; color: var(--accent);">TOTAL EQUITY</div>
-                <div id="balTotal" style="font-size: 22px; font-weight: bold; color: var(--accent);">Rp 0</div>
-            </div>
+        <div class="balance-display">
+            <div style="font-size: 10px; color: #888;">EQUITY AUM</div>
+            <div id="totalEquity" class="balance-val">Rp 0</div>
         </div>
     </div>
 
-    <div class="panel" style="margin-bottom: 15px; border-color: #555;">
-        <h3>⚙️ AUM Setup & Initialization</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label>Set Modal Saham (Rp)</label><input type="number" id="initSaham"></div>
-            <div><label>Set Modal Crypto (Rp)</label><input type="number" id="initCrypto"></div>
-        </div>
-        <button onclick="setInitialAUM()" class="btn-outline">Simpan Saldo Awal</button>
-    </div>
-
-    <div class="panel" style="margin-bottom: 15px;">
-        <h3>📊 Portfolio Analytics</h3>
-        <div class="tab-menu">
-            <button class="tab-btn active-all" id="tabAll" onclick="switchChartTab('pie')">🟡 Alokasi AUM</button>
-            <button class="tab-btn" id="tabSaham" onclick="switchChartTab('line')">🟢 Kurva Saham</button>
-            <button class="tab-btn" id="tabCrypto" onclick="switchChartTab('bar')">🔵 Kurva Crypto</button>
-        </div>
+    <div class="panel">
+        <h3>
+            <span>📊 Portfolio Analytics</span>
+            <button class="menu-trigger" onclick="toggleSidebar()">☰</button>
+        </h3>
         <div class="chart-container">
-            <canvas id="portfolioChart"></canvas>
+            <canvas id="mainChart"></canvas>
         </div>
     </div>
 
-    <div class="grid-container">
+    <div class="panel" id="executionPanel">
+        <h3 id="execTitle">⚔️ EXECUTION: SAHAM</h3>
+        <div class="ls-toggle">
+            <div id="longBtn" class="ls-btn active-long" onclick="setSide('LONG')">LONG</div>
+            <div id="shortBtn" class="ls-btn" onclick="setSide('SHORT')">SHORT</div>
+        </div>
         
-        <div class="panel">
-            <h3>⚔️ Order Execution</h3>
-            <div class="radio-group">
-                <label style="border-color: var(--saham-color);"><input type="radio" name="assetType" value="saham" checked onchange="checkRiskGuard()"> Saham Lokal</label>
-                <label style="border-color: var(--crypto-color);"><input type="radio" name="assetType" value="crypto" onchange="checkRiskGuard()"> Crypto / On-Chain</label>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div><label>Kode Aset</label><input type="text" id="asset" placeholder="BBRI / BTC"></div>
-                <div>
-                    <label>Risk (%) <span style="color:#aaa; font-size:9px;">Max 5%</span></label>
-                    <input type="number" id="riskPct" value="2" oninput="checkRiskGuard()">
-                </div>
-            </div>
-            <span id="riskWarning" style="color: var(--safe);">Risk: Rp 0</span>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                <div><label>Entry</label><input type="number" id="entry"></div>
-                <div><label>Stop Loss</label><input type="number" id="sl"></div>
-                <div><label>Take Profit</label><input type="number" id="tp"></div>
-            </div>
-            <button id="btnExecute" onclick="executeTrade()">Eksekusi Order</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><label>Kode Aset</label><input type="text" id="asset" placeholder="BBRI / BTC"></div>
+            <div><label>Risk (%)</label><input type="number" id="riskPct" value="2"></div>
         </div>
-
-        <div class="panel">
-            <h3>📂 CSV Data Injector</h3>
-            <div class="radio-group">
-                <label><input type="radio" name="injectType" value="saham" checked> Ke Saham</label>
-                <label><input type="radio" name="injectType" value="crypto"> Ke Crypto</label>
-            </div>
-            <input type="file" id="csvFile" accept=".csv" style="border: 1px dashed var(--border); padding: 10px; cursor: pointer;">
-            <button onclick="injectCSV()" style="background: #fff; color: #000; margin-bottom: 10px;">⚡ Inject Excel</button>
-            
-            <h3 style="margin-top: 20px;">💾 Database Management</h3>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-outline" onclick="exportData('saham')">📥 Backup Saham</button>
-                <button class="btn-outline" onclick="exportData('crypto')">📥 Backup Crypto</button>
-            </div>
-            <button onclick="clearHistory()" class="btn-danger" style="margin-top: 5px;">⚠️ Format DB</button>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div><label>Entry Price</label><input type="number" id="entry"></div>
+            <div><label>Exit Price (Kosong = Pending)</label><input type="number" id="exit"></div>
+            <div><label>Stop Loss</label><input type="number" id="sl"></div>
         </div>
+        <button onclick="executeTrade()" id="btnSubmit">Confirm Execution</button>
+    </div>
 
-        <div class="panel" style="grid-column: 1 / -1;">
-            <h3 style="color: var(--saham-color); border-bottom-color: var(--saham-color);">📓 Ledger Saham</h3>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead><tr><th class="th-saham">Date</th><th class="th-saham">Asset</th><th class="th-saham">Risk (Rp)</th><th class="th-saham">R/R</th><th class="th-saham">Status</th><th class="th-saham">Equity Saham</th></tr></thead>
-                    <tbody id="sahamBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="panel" style="grid-column: 1 / -1;">
-            <h3 style="color: var(--crypto-color); border-bottom-color: var(--crypto-color);">📓 Ledger Crypto</h3>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead><tr><th class="th-crypto">Date</th><th class="th-crypto">Asset</th><th class="th-crypto">Risk (Rp)</th><th class="th-crypto">R/R</th><th class="th-crypto">Status</th><th class="th-crypto">Equity Crypto</th></tr></thead>
-                    <tbody id="cryptoBody"></tbody>
-                </table>
-            </div>
+    <div class="panel">
+        <h3 id="ledgerTitle">📓 Transaction Ledger</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th><th>Asset</th><th>Side</th><th>Entry</th><th>Exit</th><th>Status</th><th>Equity After</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerBody"></tbody>
+            </table>
         </div>
     </div>
 
-    <div class="footer">&copy; 2026 Niel's Capital. Engineered for <b>Kenny Nathaniel Haryanto</b></div>
+    <div class="panel" style="border-style: dashed;">
+        <h3>📂 Database & Initialization</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <input type="number" id="initSaham" placeholder="Initial Saham">
+            <input type="number" id="initCrypto" placeholder="Initial Crypto">
+        </div>
+        <button class="btn-outline" onclick="initAUM()">Initialize Funds</button>
+        <button onclick="clearAll()" style="background:#333; color:red; margin-top:10px;">Wipe All Data</button>
+    </div>
+
+    <div class="footer">&copy; 2026 Niel's Capital. Founder: <b>Kenny Nathaniel Haryanto</b></div>
 
     <script>
-        let balSaham = parseFloat(localStorage.getItem('niels_saham_bal'));
-        let balCrypto = parseFloat(localStorage.getItem('niels_crypto_bal'));
-        let histSaham = JSON.parse(localStorage.getItem('niels_saham_hist')) || [];
-        let histCrypto = JSON.parse(localStorage.getItem('niels_crypto_hist')) || [];
-        if(isNaN(balSaham)) balSaham = 0; if(isNaN(balCrypto)) balCrypto = 0;
+        let currentView = 'all';
+        let currentSide = 'LONG';
+        let balSaham = parseFloat(localStorage.getItem('n_s_bal')) || 0;
+        let balCrypto = parseFloat(localStorage.getItem('n_c_bal')) || 0;
+        let histSaham = JSON.parse(localStorage.getItem('n_s_hist')) || [];
+        let histCrypto = JSON.parse(localStorage.getItem('n_c_hist')) || [];
+        let mainChart = null;
 
-        let chartInstance = null;
-        let currentChartMode = 'pie'; // Default mode
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
 
-        function updateRealTimeClock() {
-            const now = new Date();
-            document.getElementById('realTimeClock').innerText = "WAKTU SISTEM: " + now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('viewIndicator').innerText = `VIEW: ${view.toUpperCase()} TERMINAL`;
+            document.getElementById('execTitle').innerText = `⚔️ EXECUTION: ${view === 'all' ? 'SAHAM' : view.toUpperCase()}`;
+            toggleSidebar();
+            updateUI();
         }
-        setInterval(updateRealTimeClock, 1000); updateRealTimeClock();
+
+        function setSide(side) {
+            currentSide = side;
+            document.getElementById('longBtn').className = side === 'LONG' ? 'ls-btn active-long' : 'ls-btn';
+            document.getElementById('shortBtn').className = side === 'SHORT' ? 'ls-btn active-short' : 'ls-btn';
+        }
 
         function updateUI() {
-            document.getElementById('balSaham').innerText = `Rp ${balSaham.toLocaleString('id-ID')}`;
-            document.getElementById('balCrypto').innerText = `Rp ${balCrypto.toLocaleString('id-ID')}`;
-            document.getElementById('balTotal').innerText = `Rp ${(balSaham + balCrypto).toLocaleString('id-ID')}`;
-            renderTable(histSaham, 'sahamBody', 'saham'); renderTable(histCrypto, 'cryptoBody', 'crypto');
-            renderChart();
-            checkRiskGuard(); // Auto-update risk nominal if balance changes
-        }
-
-        function setInitialAUM() {
-            const ns = parseFloat(document.getElementById('initSaham').value); const nc = parseFloat(document.getElementById('initCrypto').value);
-            if(isNaN(ns) || isNaN(nc)) return alert("Isi nominal!");
-            if(confirm("Atur modal awal? (Grafik lama keriset)")) {
-                balSaham = ns; balCrypto = nc; histSaham = []; histCrypto = [];
-                save(); updateUI(); document.getElementById('initSaham').value=''; document.getElementById('initCrypto').value='';
-            }
-        }
-
-        // --- SISTEM RISK LIMITER (BARU) ---
-        function checkRiskGuard() {
-            const pct = parseFloat(document.getElementById('riskPct').value);
-            const warningBox = document.getElementById('riskWarning');
-            const btnExe = document.getElementById('btnExecute');
-            const type = document.querySelector('input[name="assetType"]:checked').value;
-            const activeBal = type === 'saham' ? balSaham : balCrypto;
-
-            if(isNaN(pct)) return;
-
-            if(pct > 5) {
-                warningBox.innerHTML = "⚠️ OVER RISK LIMIT! Maksimal 5% dari AUM";
-                warningBox.style.color = "var(--danger)";
-                document.getElementById('riskPct').style.borderColor = "var(--danger)";
-                btnExe.style.opacity = "0.5";
-                btnExe.disabled = true; // Kunci tombol kalau serakah
-            } else {
-                const rpRisk = activeBal * (pct/100);
-                warningBox.innerHTML = `🛡️ Risk Dialokasikan: Rp ${rpRisk.toLocaleString('id-ID')} (${type.toUpperCase()})`;
-                warningBox.style.color = "var(--safe)";
-                document.getElementById('riskPct').style.borderColor = "var(--border)";
-                btnExe.style.opacity = "1";
-                btnExe.disabled = false;
-            }
-        }
-
-        // --- SISTEM TABS GRAPHIC (BARU) ---
-        function switchChartTab(mode) {
-            currentChartMode = mode;
-            document.getElementById('tabAll').className = "tab-btn";
-            document.getElementById('tabSaham').className = "tab-btn";
-            document.getElementById('tabCrypto').className = "tab-btn";
-
-            if(mode === 'pie') document.getElementById('tabAll').className = "tab-btn active-all";
-            else if(mode === 'line') document.getElementById('tabSaham').className = "tab-btn active-saham";
-            else if(mode === 'bar') document.getElementById('tabCrypto').className = "tab-btn active-crypto";
+            const total = balSaham + balCrypto;
+            document.getElementById('totalEquity').innerText = `Rp ${total.toLocaleString('id-ID')}`;
             
-            renderChart();
-        }
-
-        function renderChart() {
-            const ctx = document.getElementById('portfolioChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-            Chart.defaults.color = '#888';
-            let config = {};
-
-            if (currentChartMode === 'pie') {
-                config = { type: 'doughnut', data: { labels: ['Saham', 'Crypto'], datasets: [{ data: [balSaham, balCrypto], backgroundColor: ['#34eb77', '#00d2ff'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } };
-            } else if (currentChartMode === 'line') {
-                config = { type: 'line', data: { labels: histSaham.map((t,i)=>`#${i+1}`), datasets: [{ label: 'Equity Saham', data: histSaham.map(t=>t.equityAfter), borderColor: '#34eb77', backgroundColor: 'rgba(52, 235, 119, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }] }, options: { maintainAspectRatio: false } };
-            } else if (currentChartMode === 'bar') {
-                config = { type: 'bar', data: { labels: histCrypto.map((t,i)=>`#${i+1}`), datasets: [{ label: 'Equity Crypto', data: histCrypto.map(t=>t.equityAfter), backgroundColor: '#00d2ff', borderRadius: 4 }] }, options: { maintainAspectRatio: false } };
-            }
-            chartInstance = new Chart(ctx, config);
-        }
-
-        function renderTable(arr, tId, type) {
-            const body = document.getElementById(tId); body.innerHTML = '';
-            [...arr].reverse().forEach((t, ir) => {
-                const i = arr.length - 1 - ir;
-                body.insertAdjacentHTML('beforeend', `<tr><td>${t.date}</td><td><b>${t.asset}</b></td><td>Rp ${t.riskRp.toLocaleString('id-ID')}</td><td style="color:${t.rr>=2?'var(--safe)':'var(--danger)'}">1:${t.rr.toFixed(1)}</td><td><select onchange="updateResult(${i}, this.value, '${type}')" style="background:#000; color:#fff; border:1px solid #444; font-size:10px; padding:3px;"><option value="pending" ${t.result==='pending'?'selected':''}>PENDING</option><option value="win" ${t.result==='win'?'selected':''}>WIN</option><option value="loss" ${t.result==='loss'?'selected':''}>LOSS</option></select></td><td style="font-weight:bold;">Rp ${t.equityAfter.toLocaleString('id-ID')}</td></tr>`);
+            const activeHist = currentView === 'crypto' ? histCrypto : histSaham;
+            const body = document.getElementById('ledgerBody');
+            body.innerHTML = '';
+            
+            [...activeHist].reverse().forEach(t => {
+                let statusClass = `status-${t.status.toLowerCase()}`;
+                body.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${t.date}</td>
+                        <td><b>${t.asset}</b></td>
+                        <td style="color:${t.side === 'LONG' ? 'var(--safe)' : 'var(--danger)'}">${t.side}</td>
+                        <td>${t.entry.toLocaleString()}</td>
+                        <td>${t.exit ? t.exit.toLocaleString() : '-'}</td>
+                        <td class="${statusClass}">${t.status}</td>
+                        <td>Rp ${t.equityAfter.toLocaleString()}</td>
+                    </tr>
+                `);
             });
+            renderChart();
         }
 
         function executeTrade() {
-            if(parseFloat(document.getElementById('riskPct').value) > 5) return alert("Risk kegedean bos! Turunin!");
-            const type = document.querySelector('input[name="assetType"]:checked').value;
             const asset = document.getElementById('asset').value.toUpperCase();
-            const riskP = parseFloat(document.getElementById('riskPct').value);
             const entry = parseFloat(document.getElementById('entry').value);
-            const sl = parseFloat(document.getElementById('sl').value);
-            const tp = parseFloat(document.getElementById('tp').value);
-            if(!entry || !sl || !tp) return alert("Lengkapi data!");
-            processTrade(type, asset, riskP, entry, sl, tp, 'pending');
-        }
+            const exit = parseFloat(document.getElementById('exit').value);
+            const riskPct = parseFloat(document.getElementById('riskPct').value);
+            const type = (currentView === 'all' || currentView === 'saham') ? 'saham' : 'crypto';
+            
+            if(!asset || !entry) return alert("Minimal isi Kode Aset & Entry!");
 
-        function processTrade(type, asset, riskPct, entry, sl, tp, resultStatus) {
+            let status = 'PENDING';
             let activeBal = type === 'saham' ? balSaham : balCrypto;
             const riskRp = activeBal * (riskPct / 100);
-            const rr = Math.abs(tp - entry) / Math.abs(entry - sl);
-            if (resultStatus === 'win') activeBal += (riskRp * rr); else if (resultStatus === 'loss') activeBal -= riskRp;
-            const tradeObj = { date: new Date().toLocaleDateString('id-ID'), asset, riskRp, rr, result: resultStatus, equityAfter: activeBal };
-            if(type === 'saham') { balSaham = activeBal; histSaham.push(tradeObj); } else { balCrypto = activeBal; histCrypto.push(tradeObj); }
-            save(); updateUI();
-        }
 
-        function injectCSV() {
-            const type = document.querySelector('input[name="injectType"]:checked').value;
-            const file = document.getElementById('csvFile').files[0];
-            if (!file) return alert("Pilih CSV!");
-            Papa.parse(file, { header: true, skipEmptyLines: true, complete: function(results) {
-                let count = 0;
-                results.data.forEach(row => { if(row.Asset && row.Entry && row.StopLoss && row.TakeProfit) { processTrade(type, row.Asset.toUpperCase(), parseFloat(row.RiskPct)||2, parseFloat(row.Entry), parseFloat(row.StopLoss), parseFloat(row.TakeProfit), (row.Result||'pending').toLowerCase()); count++; } });
-                alert(`SUKSES! ${count} trade masuk ke Ledger ${type.toUpperCase()}.`); document.getElementById('csvFile').value = "";
-            }});
-        }
-
-        function updateResult(index, res, type) {
-            let arr = type === 'saham' ? histSaham : histCrypto; let currentBal = type === 'saham' ? balSaham : balCrypto;
-            const t = arr[index];
-            if(t.result === 'win') currentBal -= (t.riskRp * t.rr); if(t.result === 'loss') currentBal += t.riskRp;
-            t.result = res;
-            if(res === 'win') currentBal += (t.riskRp * t.rr); if(res === 'loss') currentBal -= t.riskRp;
-            t.equityAfter = currentBal;
-            let tempBal = currentBal;
-            for(let i = index + 1; i < arr.length; i++) {
-                if(arr[i].result === 'win') tempBal += (arr[i].riskRp * arr[i].rr); else if(arr[i].result === 'loss') tempBal -= arr[i].riskRp;
-                arr[i].equityAfter = tempBal;
+            if(!isNaN(exit)) {
+                if(currentSide === 'LONG') status = exit > entry ? 'WIN' : 'LOSS';
+                else status = exit < entry ? 'WIN' : 'LOSS';
+                
+                // Kalkulasi profit (simulasi R/R fixed 1:2 jika win)
+                if(status === 'WIN') activeBal += (riskRp * 2);
+                else activeBal -= riskRp;
             }
-            if(type === 'saham') balSaham = tempBal; else balCrypto = tempBal;
+
+            const trade = {
+                date: new Date().toLocaleDateString(),
+                asset, entry, exit, side: currentSide,
+                status, riskRp, equityAfter: activeBal
+            };
+
+            if(type === 'saham') { balSaham = activeBal; histSaham.push(trade); }
+            else { balCrypto = activeBal; histCrypto.push(trade); }
+            
+            save(); updateUI();
+            document.getElementById('asset').value = ''; document.getElementById('entry').value = ''; document.getElementById('exit').value = '';
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if(mainChart) mainChart.destroy();
+            Chart.defaults.color = '#888';
+
+            let config = {};
+            if(currentView === 'all') {
+                config = { type: 'doughnut', data: { labels: ['Saham', 'Crypto'], datasets: [{ data: [balSaham, balCrypto], backgroundColor: ['#34eb77', '#00d2ff'], borderWidth: 0 }] }, options: { maintainAspectRatio: false } };
+            } else {
+                const hist = currentView === 'saham' ? histSaham : histCrypto;
+                config = { type: 'line', data: { labels: hist.map(t => t.asset), datasets: [{ label: `Growth ${currentView}`, data: hist.map(t => t.equityAfter), borderColor: currentView === 'saham' ? '#34eb77' : '#00d2ff', fill: false }] }, options: { maintainAspectRatio: false } };
+            }
+            mainChart = new Chart(ctx, config);
+        }
+
+        function initAUM() {
+            balSaham = parseFloat(document.getElementById('initSaham').value) || 0;
+            balCrypto = parseFloat(document.getElementById('initCrypto').value) || 0;
             save(); updateUI();
         }
 
-        function exportData(type) {
-            let arr = type === 'saham' ? histSaham : histCrypto;
-            if(arr.length === 0) return alert("Data kosong!");
-            const exportData = arr.map(t => ({ Asset: t.asset, RiskPct: (t.riskRp / (t.equityAfter - (t.result==='win'? t.riskRp*t.rr : (t.result==='loss'? -t.riskRp : 0)))) * 100, Entry: 0, StopLoss: 0, TakeProfit: 0, Result: t.result, LogDate: t.date, FinalEquity: t.equityAfter }));
-            const csv = Papa.unparse(exportData); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `NielsCapital_${type.toUpperCase()}.csv`;
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        function save() {
+            localStorage.setItem('n_s_bal', balSaham); localStorage.setItem('n_c_bal', balCrypto);
+            localStorage.setItem('n_s_hist', JSON.stringify(histSaham)); localStorage.setItem('n_c_hist', JSON.stringify(histCrypto));
         }
 
-        function save() { localStorage.setItem('niels_saham_bal', balSaham); localStorage.setItem('niels_crypto_bal', balCrypto); localStorage.setItem('niels_saham_hist', JSON.stringify(histSaham)); localStorage.setItem('niels_crypto_hist', JSON.stringify(histCrypto)); }
-        function clearHistory() { if(confirm("FORMAT DB?")) { localStorage.clear(); location.reload(); } }
-
+        function clearAll() { if(confirm("Hapus semua data?")) { localStorage.clear(); location.reload(); } }
         updateUI();
     </script>
 </body>
